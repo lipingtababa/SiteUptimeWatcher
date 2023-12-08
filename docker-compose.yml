@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: test/Dockerfile
     volumes:
-      - ./test:/app
+      - .:/app
     ports:
       - 8000:8000
     networks:
@@ -15,12 +15,13 @@ services:
       context: .
       dockerfile: src/Dockerfile
     volumes:
-      - ./src:/app
+      - .:/app
     ports:
       - 8001:8001
     networks:
       - detector-network
-
+    depends_on:
+      - testserver
 networks:
   detector-network:
     driver: bridge

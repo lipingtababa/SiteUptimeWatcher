@@ -5,11 +5,12 @@ import asyncio
 import psycopg2
 import psycopg2.extras
 from asyncio import Queue
+import random
 
 # To import the Site and Keeper class, we need to add the parent directory to the path
-current_directory = Path(__file__).resolve().parent
-parent_directory = current_directory.parent
-sys.path.append(str(parent_directory))
+src_directory = Path(__file__).resolve().parent.parent.parent / "src"
+print(f"Adding {src_directory} to path")
+sys.path.append(str(src_directory))
 
 from Keeper import Keeper 
 
@@ -20,10 +21,10 @@ class SiteFiller(Keeper):
     def FillSites(self):
         self.checkReadiness()
 
-        insert_data = [(f"http://localhost:8000/{i}", "detector", 5) for i in range(5000)]
+        insert_data = [(f"http://testserver:8000/{i}", "detector", int(random.random())) for i in range(2000)]
         psycopg2.extras.execute_values(
             self.cursor,
-            "INSERT INTO sites (url, regex, interval) VALUES %s;",
+            "TRUNCATE table sites;INSERT INTO sites (url, regex, interval) VALUES %s;",
             insert_data,
             template=None,
             page_size=1000
