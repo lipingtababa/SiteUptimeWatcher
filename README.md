@@ -59,3 +59,4 @@ We typically offer 7 days to complete this assignment. If anything comes up and 
 
 # TODO
 - Kill the process periodically to stop memory leak or any weird stuff
+- Support POST, Basic Auth and other features specific to some sites

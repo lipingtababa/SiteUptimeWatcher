@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  testserver:
+    build:
+      context: .
+      dockerfile: test/Dockerfile
+    volumes:
+      - ./test:/app
+    ports:
+      - 8000:8000
+    networks:
+      - detector-network
+  detector:
+    build:
+      context: .
+      dockerfile: src/Dockerfile
+    volumes:
+      - ./src:/app
+    ports:
+      - 8001:8001
+    networks:
+      - detector-network
+
+networks:
+  detector-network:
+    driver: bridge

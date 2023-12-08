@@ -6,7 +6,6 @@ import asyncio
 from asyncio import Queue
 import os
 
-
 async def main():
     print("Starting")
     load_dotenv()

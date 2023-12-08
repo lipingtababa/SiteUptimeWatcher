@@ -20,7 +20,7 @@ class SiteFiller(Keeper):
     def FillSites(self):
         self.checkReadiness()
 
-        insert_data = [(f"http://localhost:9876/{i}", "detector", 5) for i in range(5000)]
+        insert_data = [(f"http://localhost:8000/{i}", "detector", 5) for i in range(5000)]
         psycopg2.extras.execute_values(
             self.cursor,
             "INSERT INTO sites (url, regex, interval) VALUES %s;",
