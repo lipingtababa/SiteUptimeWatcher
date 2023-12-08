@@ -1,22 +1,24 @@
 from Agent import Agent
 from Site import Site
+from Keeper import Keeper
 import asyncio
 
 class WorkUnit:
-    async def run(self):
-        for i in range(0, 3):
-            print("Running work unit")
-            await asyncio.sleep(interval)
-            agent = Agent(Site(f"https://www.example.com/search?q={i}", ".*"))
-            await agent.run()
+    def __init__(self):
+        # All async agents in the same thread will write to the same buffer
+        self.statsBuffer = asyncio.Queue()
 
-async def main():
-    print("Running main")
-    workUnit = WorkUnit()
-    await workUnit.run()
+    async def run(self, sites: [Site]):
+        tasks = []
+        for site in sites:
+            agent = Agent(self.statsBuffer)
+            task = asyncio.create_task(agent.run(site))
+            tasks.append(task)
 
-if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
-    loop.close()
-    
+        # keeper consumes buffer and store stats into DB
+        for i in range(int(len(sites)/500)):
+            keeper = Keeper(self.statsBuffer)
+            keeperTask = asyncio.create_task(keeper.run())
+            tasks.append(keeperTask)
+
+        await asyncio.gather(*tasks)
