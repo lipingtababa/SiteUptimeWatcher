@@ -3,7 +3,6 @@ import psycopg2
 import psycopg2.extras
 
 import os
-from Exceptions import EnvException
 from datetime import datetime, timezone
 from Site import Site 
 from asyncio import Queue
@@ -17,13 +16,12 @@ class Keeper:
         self.statsBuffer = statsBuffer
 
     async def run(self):
-        print("A keeper started")
+        logger.info("A keeper started")
         while True:
             queueSize = self.statsBuffer.qsize()
-            logger.debug(f"Stats size {queueSize}")
             stats = []
             consumerLength = queueSize if queueSize < 1000 else 1000
-            print(f"Keeper consumes {consumerLength}")
+            logger.info(f"Keeper consumes {consumerLength}")
             for i in range(consumerLength):
                 stat = await self.statsBuffer.get()
                 stats.append(stat)
@@ -113,5 +111,10 @@ class Keeper:
         rows = self.cursor.fetchall()
         sites = []
         for row in rows:
-            sites.append(Site(row[0], row[1], row[2]))
+            try:
+                sites.append(Site(row[0], row[1], row[2]))
+            except Exception as e:
+                # Invalid regex will be ignored
+                logger.warn(e)
+                continue
         return sites

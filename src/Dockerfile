@@ -1,4 +1,3 @@
-# Use an official Python runtime as a parent image
 FROM python:3.11.0
 
 RUN apt update && apt install -y net-tools

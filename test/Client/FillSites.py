@@ -1,22 +1,24 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import sys
 from pathlib import Path
-from dotenv import load_dotenv
-import asyncio
+from Utils import loadConfigFromFile
 import psycopg2
 import psycopg2.extras
 from asyncio import Queue
 import random
 
-# To import the Site and Keeper class, we need to add the parent directory to the path
+# To import the Site and Keeper class, we need to add the src directory to the path
 src_directory = Path(__file__).resolve().parent.parent.parent / "src"
-print(f"Adding {src_directory} to path")
 sys.path.append(str(src_directory))
 
-from Keeper import Keeper 
+from Keeper import Keeper
 
 class SiteFiller(Keeper):
-    def __init__(self, statsBuffer: Queue):
-        super().__init__(statsBuffer)
+    def __init__(self):
+        # No need to initialize the statsBuffer
+        super().__init__(None)
 
     def FillSites(self):
         self.checkReadiness()
@@ -33,9 +35,9 @@ class SiteFiller(Keeper):
 
 def main():
     print("Starting")
-    load_dotenv()
+    loadConfigFromFile()
 
-    keeper = SiteFiller(asyncio.Queue())
+    keeper = SiteFiller()
     keeper.FillSites()
 
 if __name__ == "__main__":

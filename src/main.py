@@ -1,16 +1,15 @@
 from WorkUnit import WorkUnit
 from Keeper import Keeper
-from dotenv import load_dotenv
 import asyncio
 from asyncio import Queue
-from Utils import logger
+from Utils import logger, loadConfigFromFile
 
 async def main():
     logger.info("Starting")
-    load_dotenv()
+    loadConfigFromFile()
 
     # Re-use the Keeper class to fetch sites from DB
-    sitesToBeMonitored = Keeper(Queue()).checkReadiness().fetchSites()
+    sitesToBeMonitored = Keeper(None).checkReadiness().fetchSites()
     logger.info(f"There are {len(sitesToBeMonitored)} sites to monitor")
 
     # This is the main entry point of the program
