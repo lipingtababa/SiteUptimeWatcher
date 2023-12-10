@@ -1,23 +1,22 @@
 from WorkUnit import WorkUnit
 from Keeper import Keeper
-from Site import Site 
 from dotenv import load_dotenv
 import asyncio
 from asyncio import Queue
-import os
+from Utils import logger
 
 async def main():
-    print("Starting")
+    logger.info("Starting")
     load_dotenv()
 
-    sites = Keeper(Queue()).checkReadiness().fetchSites()
-    print(f"Found {len(sites)} sites")
+    # Re-use the Keeper class to fetch sites from DB
+    sitesToBeMonitored = Keeper(Queue()).checkReadiness().fetchSites()
+    logger.info(f"There are {len(sitesToBeMonitored)} sites to monitor")
 
+    # This is the main entry point of the program
     workUnit = WorkUnit()
-
-    await workUnit.run(sites)
+    await workUnit.run(sitesToBeMonitored)
 
 if __name__ == "__main__":
-    print("Starting")
     asyncio.run(main())
     

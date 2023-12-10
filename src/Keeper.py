@@ -9,16 +9,18 @@ from Site import Site
 from asyncio import Queue
 import asyncio
 
+from Utils import logger
+
 class Keeper:
     def __init__(self, statsBuffer: Queue):
         self.connect2DB()
         self.statsBuffer = statsBuffer
 
     async def run(self):
-        print("Keeper running")
+        print("A keeper started")
         while True:
             queueSize = self.statsBuffer.qsize()
-            print(f"Stats size {queueSize}")
+            logger.debug(f"Stats size {queueSize}")
             stats = []
             consumerLength = queueSize if queueSize < 1000 else 1000
             print(f"Keeper consumes {consumerLength}")

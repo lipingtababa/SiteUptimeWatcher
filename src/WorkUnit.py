@@ -5,18 +5,19 @@ import asyncio
 
 class WorkUnit:
     def __init__(self):
-        # All async Workers in the same thread will write to the same buffer
+        # This buffer is used between workers and keepers
         self.statsBuffer = asyncio.Queue()
 
     async def run(self, sites: [Site]):
         tasks = []
+        # workers detect sites and put stats into buffer
         for site in sites:
             worker = Worker(self.statsBuffer)
             task = asyncio.create_task(worker.run(site))
             tasks.append(task)
 
-        # keeper consumes buffer and store stats into DB
-        for i in range(int(len(sites)/500)):
+        # keepers consume buffer and store stats into DB
+        for _ in range(int(len(sites)/500)):
             keeper = Keeper(self.statsBuffer)
             keeperTask = asyncio.create_task(keeper.run())
             tasks.append(keeperTask)

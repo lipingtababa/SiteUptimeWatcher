@@ -3,14 +3,14 @@ from Stat import Stat
 import aiohttp
 import asyncio
 import time 
-
+from Utils import logger
 class Worker:
     # TODO: Support Post and other HTTP methods
     def __init__(self, statsBuffer: asyncio.Queue):
         self.statsBuffer = statsBuffer
 
     async def run(self, site: Site):
-        print(f"Running Worker {site.url}")
+        logger.debug(f"Running Worker {site.url}")
         async with aiohttp.ClientSession() as session:
             while True:
                 stat = Stat(site.url,
@@ -30,7 +30,7 @@ class Worker:
                     await asyncio.sleep(site.interval)
                     continue
                 except Exception as e:
-                    print(e)
+                    logger.info(e)
                     continue
 
                 stat.duration = time.time() - stat.startTime
