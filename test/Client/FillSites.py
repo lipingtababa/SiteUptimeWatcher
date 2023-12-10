@@ -21,7 +21,7 @@ class SiteFiller(Keeper):
     def FillSites(self):
         self.checkReadiness()
 
-        insert_data = [(f"http://testserver:8000/{i}", "detector", int(random.random())) for i in range(2000)]
+        insert_data = [(f"http://testserver:8000/{i}", "detector", int(random.random())) for i in range(1000)]
         psycopg2.extras.execute_values(
             self.cursor,
             "TRUNCATE table sites;INSERT INTO sites (url, regex, interval) VALUES %s;",

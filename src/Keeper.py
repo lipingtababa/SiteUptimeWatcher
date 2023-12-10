@@ -20,7 +20,7 @@ class Keeper:
             queueSize = self.statsBuffer.qsize()
             print(f"Stats size {queueSize}")
             stats = []
-            consumerLength = queueSize if queueSize < 100 else 100
+            consumerLength = queueSize if queueSize < 1000 else 1000
             print(f"Keeper consumes {consumerLength}")
             for i in range(consumerLength):
                 stat = await self.statsBuffer.get()

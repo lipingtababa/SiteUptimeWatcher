@@ -4,12 +4,13 @@ import aiohttp
 import asyncio
 import time 
 
-class Agent:
+class Worker:
     # TODO: Support Post and other HTTP methods
     def __init__(self, statsBuffer: asyncio.Queue):
         self.statsBuffer = statsBuffer
 
     async def run(self, site: Site):
+        print(f"Running Worker {site.url}")
         async with aiohttp.ClientSession() as session:
             while True:
                 stat = Stat(site.url,
@@ -18,11 +19,9 @@ class Agent:
                             0,
                             site.regex,
                             False)
-                print(f"Running agent {site.url}")
                 try:
                     resp = await session.get(site.url)
                 except aiohttp.ClientConnectorError:
-                    print(f"Agent {site.url} got error")
                     stat.duration = time.time() - stat.startTime
                     stat.statusCode = 0
                     stat.regexMatch = False
@@ -30,7 +29,9 @@ class Agent:
                     await self.statsBuffer.put(stat)
                     await asyncio.sleep(site.interval)
                     continue
-                print(f"Agent {site.url} got response")
+                except Exception as e:
+                    print(e)
+                    continue
 
                 stat.duration = time.time() - stat.startTime
                 stat.statusCode = resp.status
@@ -47,10 +48,5 @@ class Agent:
                     stat.regexMatch = False
                     stat.regex = None
                 
-                print(f"Agent {site.url} append")
                 await self.statsBuffer.put(stat)
-
-                print(f"Agent {site.url} finished")
                 await asyncio.sleep(site.interval)
-
-    

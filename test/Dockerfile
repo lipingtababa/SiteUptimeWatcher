@@ -17,4 +17,4 @@ RUN pip install --no-cache-dir -r test/requirements.txt
 EXPOSE 8000
 
 # Run main.py (or test_client.py/TestServer.py) when the container launches
-CMD ["uvicorn", "test.server.TestServer:app", "--host", "0.0.0.0", "--reload", "--timeout-keep-alive", "305"]
+CMD ["uvicorn", "test.server.TestServer:app", "--host", "0.0.0.0", "--reload", "--timeout-keep-alive", "305", "--log-level", "error"]

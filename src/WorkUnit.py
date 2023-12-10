@@ -1,18 +1,18 @@
-from Agent import Agent
+from Worker import Worker
 from Site import Site
 from Keeper import Keeper
 import asyncio
 
 class WorkUnit:
     def __init__(self):
-        # All async agents in the same thread will write to the same buffer
+        # All async Workers in the same thread will write to the same buffer
         self.statsBuffer = asyncio.Queue()
 
     async def run(self, sites: [Site]):
         tasks = []
         for site in sites:
-            agent = Agent(self.statsBuffer)
-            task = asyncio.create_task(agent.run(site))
+            worker = Worker(self.statsBuffer)
+            task = asyncio.create_task(worker.run(site))
             tasks.append(task)
 
         # keeper consumes buffer and store stats into DB
