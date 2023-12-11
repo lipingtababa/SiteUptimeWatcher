@@ -66,15 +66,17 @@ class Keeper:
             )
         present = self.cursor.fetchone()[0]
         if not present:
-            self.cursor.execute(f"DROP SEQUENCE IF EXISTS {ENDPOINTS_TABLE_NAME}_endpoint_id_seq CASCADE;")
+            self.cursor.execute(
+                f"DROP SEQUENCE IF EXISTS {ENDPOINTS_TABLE_NAME}_endpoint_id_seq CASCADE;"
+                )
             self.cursor.execute(f"""
                 CREATE TABLE IF NOT EXISTS {ENDPOINTS_TABLE_NAME} (
                     endpoint_id SERIAL PRIMARY KEY,
                     url VARCHAR(255) not null,
                     regex VARCHAR(255),
                     interval INT CHECK (interval >= 5 AND interval <= 300)
-                );
-            """)
+                    );
+                """)
             self.conn.commit()
         return self
 

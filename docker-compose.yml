@@ -14,7 +14,7 @@ services:
     environment:
       - RUN_AS=TEST_SERVER
   detector:
-    restart: never
+    restart: no
     build:
       context: .
       dockerfile: Dockerfile

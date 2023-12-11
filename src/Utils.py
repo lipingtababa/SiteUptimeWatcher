@@ -14,11 +14,10 @@ from detector_expections import EnvException
 WORKER_KEEPER_RATIO = 500
 KEEPER_SLEEP_INTERVAL = 0.1
 
-
 def initLogger():
     """Initialize global variable logger."""
     thelogger = logging.getLogger('detector_logger')
-    thelogger.setLevel(logging.INFO)
+    thelogger.setLevel(logging.DEBUG)
     handler = logging.StreamHandler()
     formatter = logging.Formatter(
         '%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s'

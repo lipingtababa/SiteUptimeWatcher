@@ -9,7 +9,7 @@ class Endpoint:
         1. a regex to match against the response body.
         2. an interval to send requests.
     """
-    def __init__(self, endpoint_id, url, regex, interval=5):
+    def __init__(self, endpoint_id, url, regex, interval):
         """Never trust the DB, always validate your input"""
         assert endpoint_id, "id is required"
         assert url, "url is required"

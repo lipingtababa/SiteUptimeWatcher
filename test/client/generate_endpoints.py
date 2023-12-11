@@ -29,7 +29,7 @@ class SiteFiller(Keeper):
         insert_data = [
             (f"http://testserver:8000/{i}",
              "welcome",
-             random.randint(5, 30)) for i in range(1000)
+             random.randint(5, 30)) for i in range(10)
              ]
         psycopg2.extras.execute_values(
             self.cursor,
