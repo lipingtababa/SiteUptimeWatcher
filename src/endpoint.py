@@ -2,6 +2,7 @@
 This module contains the Endpoint class"""
 import re
 
+# pylint: disable=too-few-public-methods
 class Endpoint:
     """
     An Endpoint is a URL with 
@@ -12,7 +13,8 @@ class Endpoint:
         """Never trust the DB, always validate your input"""
         assert endpoint_id, "id is required"
         assert url, "url is required"
-        assert interval % 5 == 0 and interval <=300 and interval >=5, "interval must be greater than 0"
+        assert interval, "interval is required"
+        assert 5 <= interval <= 300, "interval must be greater than 0"
 
         self.endpoint_id = endpoint_id
         self.url = url

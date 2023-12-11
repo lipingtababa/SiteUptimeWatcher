@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pytest
+# pylint: disable=missing-docstring
+
 import os
 import sys
 from pathlib import Path
+import pytest
 
 # To import the src code, we need to add the src directory to the path
 src_directory = Path(__file__).resolve().parent.parent / "src"
@@ -17,9 +19,9 @@ def clear_db_env_vars_fixture():
     clear_db_env_vars()
 
 def clear_db_env_vars():
-    vars = ["DB_HOST", "DB_PORT", "DB_NAME", "DB_USER", "DB_PASSWORD"]
-    for var in vars:
-        os.environ.pop(var, None)
+    paras = ["DB_HOST", "DB_PORT", "DB_NAME", "DB_USER", "DB_PASSWORD"]
+    for para in paras:
+        os.environ.pop(para, None)
 
 def test_loadConfigFromFile():
     loadConfigFromFile(file = "./test/test_data/env_files/.env.valid")

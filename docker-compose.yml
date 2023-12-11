@@ -11,8 +11,10 @@ services:
       - 8000:8000
     networks:
       - detector-network
+    environment:
+      - RUN_AS=TEST_SERVER
   detector:
-    restart: always
+    restart: never
     build:
       context: .
       dockerfile: Dockerfile

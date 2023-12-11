@@ -66,12 +66,13 @@ class Keeper:
             )
         present = self.cursor.fetchone()[0]
         if not present:
+            self.cursor.execute(f"DROP SEQUENCE IF EXISTS {ENDPOINTS_TABLE_NAME}_endpoint_id_seq CASCADE;")
             self.cursor.execute(f"""
                 CREATE TABLE IF NOT EXISTS {ENDPOINTS_TABLE_NAME} (
                     endpoint_id SERIAL PRIMARY KEY,
                     url VARCHAR(255) not null,
                     regex VARCHAR(255),
-                    interval INT not null
+                    interval INT CHECK (interval >= 5 AND interval <= 300)
                 );
             """)
             self.conn.commit()
@@ -100,11 +101,11 @@ class Keeper:
         self.conn.commit()
         self.cursor.execute(f"""
             CREATE TABLE IF NOT EXISTS {METRICS_TABLE_NAME} (
-                time TIMESTAMP NOT NULL PRIMARY KEY,
+                start_time TIMESTAMP NOT NULL PRIMARY KEY,
                 endpoint_id integer REFERENCES {ENDPOINTS_TABLE_NAME}(endpoint_id),
                 duration REAL NOT NULL,
-                statusCode INT,
-                regexMatch BOOLEAN
+                status_code INT,
+                regex_match BOOLEAN
             );
         """)
         self.conn.commit()
@@ -118,7 +119,7 @@ class Keeper:
         """)
         is_hypertable = self.cursor.fetchone()[0]
         if not is_hypertable:
-            self.cursor.execute(f"SELECT create_hypertable('{METRICS_TABLE_NAME}', 'time');")
+            self.cursor.execute(f"SELECT create_hypertable('{METRICS_TABLE_NAME}', 'start_time');")
             self.conn.commit()
         return self
 
@@ -137,14 +138,15 @@ class Keeper:
         psycopg2.extras.execute_values(
             self.cursor,
             f"""
-            INSERT INTO {ENDPOINTS_TABLE_NAME} (endpoint_id, time, duration, statusCode, regexMatch)
+            INSERT INTO {METRICS_TABLE_NAME}
+            (start_time, endpoint_id, duration, status_code, regex_match)
             VALUES %s;
             """,
-            [(  stat.endpoint.endpoint_id,
-                datetime.fromtimestamp(stat.startTime, timezone.utc),
-                stat.duration,
-                stat.statusCode,
-                stat.regexMatch) for stat in metrics],
+            [(  datetime.fromtimestamp(metric.startTime, timezone.utc),
+                metric.endpoint.endpoint_id,
+                metric.duration,
+                metric.statusCode,
+                metric.regexMatch) for metric in metrics],
             template=None,
             page_size=1000
         )

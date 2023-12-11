@@ -5,10 +5,9 @@ Load configuration, Ensure DB is ready, Fetch sites from DB and Start monitoring
 """
 
 import asyncio
-from Utils import logger, loadConfigFromFile
+from utils import logger, loadConfigFromFile
+from keeper import Keeper
 from worker import Worker
-from Keeper import Keeper
-
 
 async def main():
     """This function runs on every node.
@@ -17,11 +16,13 @@ async def main():
     loadConfigFromFile()
 
     # Re-use the Keeper class to fetch sites from DB
-    sitesToBeMonitored = Keeper(None).checkReadiness().fetchSites()
-    logger.info("There are %d URLs to monitor", len(sitesToBeMonitored))
+    keeper = Keeper(None)
+    keeper.checkReadiness()
+    endpointsToBeMonitored = keeper.fetchEndpoints()
+    logger.info("There are %d URLs to monitor", len(endpointsToBeMonitored))
 
     worker = Worker()
-    await worker.run(sitesToBeMonitored)
+    await worker.run(endpointsToBeMonitored)
 
 if __name__ == "__main__":
     asyncio.run(main())

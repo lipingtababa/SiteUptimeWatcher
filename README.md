@@ -7,7 +7,7 @@
 * To reduce complexity and infrastructure cost, it is acceptable to lose a small amount of time-series data.
 
 # Classes Overview
-For every node, there is one [Worker](./src/worker.py), which sends HTTP requests to each [Endpoint](./src/endpoint.py) and put the generated [Stats](./src/stats.py) into a buffer. A proper number of [Keeper](./src/Keeper.py) are provisioned to dump the stats into DB.
+For every node, there is one [Worker](./src/worker.py), which sends HTTP requests to each [Endpoint](./src/endpoint.py) and put the generated [Stat](./src/metrics.py) into a buffer. A proper number of [Keeper](./src/Keeper.py) are provisioned to dump the stats into DB.
 All of the tasks run in the same event loop, which means that multiple CPU cores are not utilized at this moment.
 
 # Concurrency 

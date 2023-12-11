@@ -29,12 +29,13 @@ class Worker:
             tasks.append(task)
 
         # keepers consume buffer and store stats into DB
-        for i in range(int(len(endpoints)/WORKER_KEEPER_RATIO)):
+        numKeepers = len(endpoints) // WORKER_KEEPER_RATIO + 1
+        for _ in range(numKeepers):
             keeper = Keeper(self.statsBuffer)
             keeperTask = asyncio.create_task(keeper.run())
             tasks.append(keeperTask)
 
-        logger.info(f"worker provisioned {len(endpoints)} fetchers and {i+1} keepers.")
+        logger.info(f"worker provisioned {len(endpoints)} fetchers and {numKeepers} keepers.")
         await asyncio.gather(*tasks)
 
     async def monitor(self, endpoint: Endpoint):
