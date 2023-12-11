@@ -25,23 +25,15 @@ class Stat():
 
     async def initFromHTTPResponse(self, response):
         """Parse HTTP response and update itself."""
-        assert self.endpoint, "endpoint must be set"
-        assert self.startTime, "startTime must be set"
+        assert self.endpoint, "endpoint must be set before calling initFromHTTPResponse"
+        assert self.startTime, "startTime must be set before calling initFromHTTPResponse"
 
         self.duration = time.time() - self.startTime
         self.statusCode = response.status
         if self.statusCode == 200:
-            # There is a chance that the body of the HTTP response
-            # has not been fully downloaded
             text = await response.text()
-            if not self.endpoint.regex or self.endpoint.regex.match(text):
+            if self.endpoint.regex and self.endpoint.regex.match(text):
                 self.regexMatch = True
-            else:
-                self.regexMatch = False
-        else:
-            # If status code is not 200,
-            # then regex matching is not applicable
-            self.regexMatch = False
 
     def __str__(self):
         """Output as a json string"""
