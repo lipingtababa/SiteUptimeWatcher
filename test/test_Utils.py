@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 # pylint: disable=missing-docstring
 
 import os
@@ -40,7 +39,7 @@ def test_loadConfigFromFile_missing_variable():
     for file in os.listdir("./test/test_data/env_files"):
         if file.startswith(".env.invalid.missing"):
             print("Testing file: " + file)
-            # this fixture must be called before every test
+            # this fixure is invoked manually
             clear_db_env_vars()
             # assert that the exception is raised and msg is correct
             with pytest.raises(EnvException) as e:
