@@ -46,4 +46,3 @@ class Stat():
     def __str__(self):
         """Output as a json string"""
         return json.dumps(self.__dict__)
-

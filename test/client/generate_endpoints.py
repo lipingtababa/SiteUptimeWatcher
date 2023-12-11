@@ -8,12 +8,10 @@ import random
 import psycopg2
 import psycopg2.extras
 
-from utils import loadConfigFromFile, ENDPOINTS_TABLE_NAME
-
 # To import the Site and Keeper class, we need to add the src directory to the path
 src_directory = Path(__file__).resolve().parent.parent.parent / "src"
 sys.path.append(str(src_directory))
-
+from utils import loadConfigFromFile, ENDPOINTS_TABLE_NAME
 from keeper import Keeper
 
 class SiteFiller(Keeper):
