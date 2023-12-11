@@ -16,6 +16,8 @@ async def catch_all(request: Request):
     # 20% chance of high latency
     if rand_val % 5 == 0:
         await asyncio.sleep(1)
+    else:
+        await asyncio.sleep(0.01)
 
     if rand_val <= 10:
         return Response(content="SERVER ERROR", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

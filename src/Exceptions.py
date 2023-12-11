@@ -1,2 +1,0 @@
-class EnvException(Exception):
-    pass

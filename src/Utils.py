@@ -1,13 +1,18 @@
 import logging
 import os
 from dotenv import load_dotenv
-from Exceptions import EnvException
+from detector_expections import EnvException
+
+# define a constant
+WORKER_KEEPER_RATIO = 500
+KEEPER_SLEEP_INTERVAL = 0.1
+
+
 def initLogger():
-    # 设置日志器的级别
     logger = logging.getLogger('detector_logger')
     logger.setLevel(logging.INFO)
     handler = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     return logger
@@ -20,3 +25,4 @@ def loadConfigFromFile(file =".env"):
         raise EnvException("DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME must be set")
     if os.getenv("DB_PORT").isdigit() is False:
         raise EnvException("DB_PORT must be an integer")
+

@@ -3,17 +3,18 @@
 
 import sys
 from pathlib import Path
-from Utils import loadConfigFromFile
+import random
+
 import psycopg2
 import psycopg2.extras
-from asyncio import Queue
-import random
+
+from utils import loadConfigFromFile, ENDPOINTS_TABLE_NAME
 
 # To import the Site and Keeper class, we need to add the src directory to the path
 src_directory = Path(__file__).resolve().parent.parent.parent / "src"
 sys.path.append(str(src_directory))
 
-from Keeper import Keeper
+from keeper import Keeper
 
 class SiteFiller(Keeper):
     def __init__(self):
@@ -26,7 +27,7 @@ class SiteFiller(Keeper):
         insert_data = [(f"http://testserver:8000/{i}", "detector", int(random.random())) for i in range(1000)]
         psycopg2.extras.execute_values(
             self.cursor,
-            "TRUNCATE table sites;INSERT INTO sites (url, regex, interval) VALUES %s;",
+            f"TRUNCATE table {ENDPOINTS_TABLE_NAME};INSERT INTO {ENDPOINTS_TABLE_NAME} (url, regex, interval) VALUES %s;",
             insert_data,
             template=None,
             page_size=1000
