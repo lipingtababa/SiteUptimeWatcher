@@ -3,8 +3,8 @@ Module for performance metrics.
 """
 import json
 import time
-from endpoint import Endpoint
 from aiohttp import ClientResponse
+from endpoint import Endpoint
 
 class Stat():
     """To store performance metrics for a single request."""
@@ -33,8 +33,6 @@ class Stat():
         self.status_code = response.status
         if self.status_code == 200:
             text = await response.text()
-            
-            print(text)
             if self.endpoint.regex and self.endpoint.regex.match(text):
                 self.regex_match = True
 
