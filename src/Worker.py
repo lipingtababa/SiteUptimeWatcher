@@ -10,7 +10,8 @@ import aiohttp
 from utils import logger, WORKER_KEEPER_RATIO
 from endpoint import Endpoint
 from keeper import Keeper
-from metrics import Stat
+import metrics
+import utils
 
 class Worker:
     """
@@ -35,20 +36,22 @@ class Worker:
             keeperTask = asyncio.create_task(keeper.run())
             tasks.append(keeperTask)
 
-        logger.info(f"worker provisioned {len(endpoints)} fetchers and {numKeepers} keepers.")
+        logger.info(f"worker provisioned {len(endpoints)} monitors and {numKeepers} keepers.")
         await asyncio.gather(*tasks)
 
     async def monitor(self, endpoint: Endpoint):
         """ Send HTTP requests and collect metrics from responses."""
         async with aiohttp.ClientSession() as session:
-            while True:
-                stat = Stat(endpoint, time.time())
+            while utils.RUNNING_STATUS:
+                # This object is what we want
+                metric = metrics.Stat(endpoint, time.time())
                 try:
                     resp = await session.get(endpoint.url)
-                    await stat.initFromHTTPResponse(resp)
+                    await metric.build_from_successful_http_req(resp)
                 except Exception as e:
-                    logger.error(f"Exception {e} raised when requesting {endpoint.url}")
-                    stat.initFromFailedRequest()
+                    logger.info(f"Exception {e} raised when requesting {endpoint.url}")
+                    metric.build_from_failed_http_req()
                 finally:
-                    await self.statsBuffer.put(stat)
+                    await self.statsBuffer.put(metric)
                     await asyncio.sleep(endpoint.interval)
+            logger.info("Exiting the monitor loop")

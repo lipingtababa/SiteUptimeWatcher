@@ -12,7 +12,7 @@ import asyncio
 import psycopg2
 import psycopg2.extras
 
-from utils import logger, KEEPER_SLEEP_INTERVAL
+from utils import logger, KEEPER_SLEEP_INTERVAL, RUNNING_STATUS
 from metrics import Stat
 from endpoint import Endpoint
 
@@ -23,28 +23,29 @@ class Keeper:
     """
     This class deals with the database.
     """
-    def __init__(self, statsBuffer: Queue):
-        self.connect2DB()
-        self.statsBuffer = statsBuffer
+    def __init__(self, metrics_buffer: Queue):
+        self.connect_to_db()
+        self.metrics_buffer = metrics_buffer
 
     async def run(self):
         """ Consume stats from statsBuffer and insert them into DB."""
         logger.info("A keeper started")
-        while True:
-            queueSize = self.statsBuffer.qsize()
-            stats = []
-            consumerLength = queueSize if queueSize < 1000 else 1000
-            logger.info(f"Keeper consumes {consumerLength}")
-            for _ in range(consumerLength):
+        while RUNNING_STATUS:
+            queue_size = self.metrics_buffer.qsize()
+            metrics = []
+            consumer_length = queue_size if queue_size < 1000 else 1000
+            logger.info(f"Keeper consumes {consumer_length}")
+            for _ in range(consumer_length):
                 # TODO There must be a better way
                 # to consume multiple items from a queue
-                stat = await self.statsBuffer.get()
-                stats.append(stat)
-                self.statsBuffer.task_done()
-            self.insert(stats)
+                metric = await self.metrics_buffer.get()
+                metrics.append(metric)
+                self.metrics_buffer.task_done()
+            self.insert_metrics(metrics)
             await asyncio.sleep(KEEPER_SLEEP_INTERVAL)
+        logger.info("Exiting a Keeper loop")
 
-    def connect2DB(self):
+    def connect_to_db(self):
         """Connect to DB."""
         self.conn = psycopg2.connect(
             dbname = os.getenv("DB_NAME"),
@@ -56,7 +57,7 @@ class Keeper:
         self.cursor = self.conn.cursor()
         return self
 
-    def assureEndpointTable(self):
+    def assure_endpoint_table(self):
         """Check if endpoint table is present"""
         self.cursor.execute(
             f"""SELECT EXISTS (
@@ -80,8 +81,8 @@ class Keeper:
             self.conn.commit()
         return self
 
-    def fetchEndpoints(self):
-        """Fetch URLs to be monitored from table sites."""
+    def fetch_endpoints(self):
+        """Fetch URLs to be monitored from a DB table."""
         self.cursor.execute(
             f"SELECT endpoint_id, url, regex, interval FROM {ENDPOINTS_TABLE_NAME};"
             )
@@ -96,7 +97,7 @@ class Keeper:
                 continue
         return endpoints
 
-    def assureMetricsTable(self):
+    def assure_metrics_table(self):
         """Check if metrics table is present and a hypertable. If not, create one."""
 
         self.cursor.execute("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;")
@@ -125,14 +126,14 @@ class Keeper:
             self.conn.commit()
         return self
 
-    def checkReadiness(self):
+    def check_readiness(self):
         """Ensure DB tables are ready."""
-        self.connect2DB()
-        self.assureEndpointTable()
-        self.assureMetricsTable()
+        self.connect_to_db()
+        self.assure_endpoint_table()
+        self.assure_metrics_table()
         return self
 
-    def insert(self, metrics: [Stat]):
+    def insert_metrics(self, metrics: [Stat]):
         """Insert metrics into DB."""
         if len(metrics) == 0:
             return
@@ -144,11 +145,11 @@ class Keeper:
             (start_time, endpoint_id, duration, status_code, regex_match)
             VALUES %s;
             """,
-            [(  datetime.fromtimestamp(metric.startTime, timezone.utc),
+            [(  datetime.fromtimestamp(metric.start_time, timezone.utc),
                 metric.endpoint.endpoint_id,
                 metric.duration,
-                metric.statusCode,
-                metric.regexMatch) for metric in metrics],
+                metric.status_code,
+                metric.regex_match) for metric in metrics],
             template=None,
             page_size=1000
         )

@@ -14,7 +14,17 @@ from detector_expections import EnvException
 WORKER_KEEPER_RATIO = 500
 KEEPER_SLEEP_INTERVAL = 0.1
 
-def initLogger():
+
+RUNNING_STATUS = True
+
+# install a signal handler
+# pylint: disable=unused-argument, global-statement
+def handl_signals(signal, frame):
+    """Update the global variable so work loop would exit gracefully."""
+    global RUNNING_STATUS
+    RUNNING_STATUS = False
+
+def init_logger():
     """Initialize global variable logger."""
     thelogger = logging.getLogger('detector_logger')
     thelogger.setLevel(logging.DEBUG)
@@ -26,9 +36,9 @@ def initLogger():
     thelogger.addHandler(handler)
     return thelogger
 
-logger = initLogger()
+logger = init_logger()
 
-def loadConfigFromFile(file =".env"):
+def load_config_from_file(file =".env"):
     """Load configuration from .env or a specified file."""
     load_dotenv(file)
 
