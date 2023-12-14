@@ -1,0 +1,166 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": {
+            "type": "grafana",
+            "uid": "-- Grafana --"
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 1,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+      {
+        "datasource": {
+          "type": "postgres",
+          "name": "PostgreSQL"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        },
+        "id": 1,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "f986d4ca-5beb-45bd-bf0e-54bd5270a21f"
+            },
+            "editorMode": "code",
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "SELECT\n  time_bucket('1 minute', start_time) AS time,\n  AVG(duration) AS average_duration\nFROM metrics\nGROUP BY time;",
+            "refId": "A",
+            "sql": {
+              "columns": [
+                {
+                  "name": "MAX",
+                  "parameters": [
+                    {
+                      "name": "duration",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                },
+                {
+                  "parameters": [
+                    {
+                      "name": "start_time",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                }
+              ],
+              "groupBy": [
+                {
+                  "property": {
+                    "name": "start_time",
+                    "type": "string"
+                  },
+                  "type": "groupBy"
+                }
+              ],
+              "limit": 50
+            },
+            "table": "metrics"
+          }
+        ],
+        "title": "Panel Title",
+        "type": "timeseries"
+      }
+    ],
+    "refresh": false,
+    "schemaVersion": 38,
+    "tags": [],
+    "templating": {
+      "list": []
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "Website latency",
+    "uid": "ae7a1147-3b38-4c45-a8d6-5ca1f96833e6",
+    "version": 3,
+    "weekStart": ""
+  }

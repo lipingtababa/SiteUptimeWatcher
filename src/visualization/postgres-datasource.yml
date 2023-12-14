@@ -1,0 +1,17 @@
+apiVersion: 1
+
+datasources:
+  - name: PostgreSQL
+    type: postgres
+    access: proxy
+    url: pg-detector-the-pg.a.aivencloud.com:22047
+    database: defaultdb
+    user: avnadmin
+    secureJsonData:
+      password: AVNS_V07Qhz2c8hI7zBXQ33H
+    isDefault: true
+    jsonData:
+      sslMode: require
+      postgresVersion: 15
+      timescaledb: true
+
