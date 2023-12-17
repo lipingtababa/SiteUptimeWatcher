@@ -12,7 +12,7 @@ from detector_expections import EnvException
 
 # define a constant
 WORKER_KEEPER_RATIO = 5000
-KEEPER_SLEEP_INTERVAL = 1
+KEEPER_SLEEP_INTERVAL = 0.2
 
 
 RUNNING_STATUS = True

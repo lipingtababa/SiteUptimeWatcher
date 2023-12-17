@@ -19,7 +19,7 @@ from endpoint import Endpoint
 
 ENDPOINTS_TABLE_NAME = 'endpoints'
 METRICS_TABLE_NAME = 'metrics'
-PG_BATCH_SIZE = 2000
+PG_BATCH_SIZE = 1000
 
 class Keeper:
     """
