@@ -1,5 +1,17 @@
 version: '3.8'
 services:
+  preparer:
+      restart: no
+      build:
+        context: .
+        dockerfile: Dockerfile
+      volumes:
+        - .:/app
+      networks:
+        - detector-network
+      environment:
+        - RUN_AS=PREPARER
+
   testserver:
     restart: always
     build:
@@ -13,17 +25,21 @@ services:
       - detector-network
     environment:
       - RUN_AS=TEST_SERVER
+
   detector:
     restart: no
     build:
       context: .
       dockerfile: Dockerfile
+    privileged: true
     volumes:
       - .:/app
     networks:
       - detector-network
     depends_on:
-      - testserver
+      preparer:
+        condition: service_completed_successfully
+
 networks:
   detector-network:
     driver: bridge

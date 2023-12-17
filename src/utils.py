@@ -11,15 +11,15 @@ from dotenv import load_dotenv
 from detector_expections import EnvException
 
 # define a constant
-WORKER_KEEPER_RATIO = 500
-KEEPER_SLEEP_INTERVAL = 0.1
+WORKER_KEEPER_RATIO = 5000
+KEEPER_SLEEP_INTERVAL = 1
 
 
 RUNNING_STATUS = True
 
 # install a signal handler
 # pylint: disable=unused-argument, global-statement
-def handl_signals(signal, frame):
+def handle_signals(signal, frame):
     """Update the global variable so work loop would exit gracefully."""
     global RUNNING_STATUS
     RUNNING_STATUS = False
@@ -27,10 +27,10 @@ def handl_signals(signal, frame):
 def init_logger():
     """Initialize global variable logger."""
     thelogger = logging.getLogger('detector_logger')
-    thelogger.setLevel(logging.DEBUG)
+    thelogger.setLevel(logging.INFO)
     handler = logging.StreamHandler()
     formatter = logging.Formatter(
-        '%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s'
+        '%(asctime)s - %(process)d - %(filename)s:%(lineno)d - %(levelname)s - %(message)s'
         )
     handler.setFormatter(formatter)
     thelogger.addHandler(handler)

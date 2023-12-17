@@ -12,7 +12,7 @@ import psycopg2.extras
 # To import the Site and Keeper class, we need to add the src directory to the path
 src_directory = Path(__file__).resolve().parent.parent.parent / "src"
 sys.path.append(str(src_directory))
-from utils import load_config_from_file
+from utils import load_config_from_file, logger
 from keeper import Keeper, ENDPOINTS_TABLE_NAME
 
 # pylint: disable=too-few-public-methods
@@ -23,17 +23,17 @@ class SiteGenerator(Keeper):
         super().__init__(None)
 
     def generate_endpoints(self):
-        """ IMPOTANT! It will erase any existing data in the DB."""
-        self.check_readiness()
+        """ IMPORTANT! It will erase any existing data in the DB."""
+        self.cursor.execute(f"TRUNCATE table {ENDPOINTS_TABLE_NAME} CASCADE;")
 
         insert_data = [
             (f"http://testserver:8000/{i}",
              ".*welcome",
-             random.randint(5, 30)) for i in range(10000)
+             random.randint(5, 30)) for i in range(50000)
              ]
         psycopg2.extras.execute_values(
             self.cursor,
-            f"""TRUNCATE table {ENDPOINTS_TABLE_NAME} CASCADE;
+            f"""
                 INSERT INTO {ENDPOINTS_TABLE_NAME} (url, regex, interval) VALUES %s;
             """,
             insert_data,
@@ -44,7 +44,7 @@ class SiteGenerator(Keeper):
 
 def main():
     """ This is an independent script."""
-    print("Starting")
+    logger.info("Generating endpoints")
     load_config_from_file()
 
     keeper = SiteGenerator()

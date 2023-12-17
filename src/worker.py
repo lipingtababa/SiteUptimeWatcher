@@ -49,7 +49,7 @@ class Worker:
                     resp = await session.get(endpoint.url)
                     await metric.build_from_successful_http_req(resp)
                 except Exception as e:
-                    logger.info(f"Exception {e} raised when requesting {endpoint.url}")
+                    logger.debug(f"Exception {e} raised when requesting {endpoint.url}")
                     metric.build_from_failed_http_req()
                 finally:
                     await self.statsBuffer.put(metric)

@@ -31,18 +31,23 @@ class Keeper:
         """ Consume stats from statsBuffer and insert them into DB."""
         logger.info("A keeper started")
         while RUNNING_STATUS:
-            queue_size = self.metrics_buffer.qsize()
-            metrics = []
-            consumer_length = queue_size if queue_size < 1000 else 1000
-            logger.info(f"Keeper consumes {consumer_length}")
-            for _ in range(consumer_length):
-                # TODO There must be a better way
-                # to consume multiple items from a queue
-                metric = await self.metrics_buffer.get()
-                metrics.append(metric)
-                self.metrics_buffer.task_done()
-            self.insert_metrics(metrics)
-            await asyncio.sleep(KEEPER_SLEEP_INTERVAL)
+            try:
+                queue_size = self.metrics_buffer.qsize()
+                if queue_size > 0:
+                    metrics = []
+                    consumer_length = queue_size if queue_size < 1000 else 1000
+                    logger.info(f"Keeper consumes {consumer_length}")
+                    for _ in range(consumer_length):
+                        # TODO There must be a better way
+                        # to consume multiple items from a queue
+                        metric = await self.metrics_buffer.get()
+                        metrics.append(metric)
+                        self.metrics_buffer.task_done()
+                    self.insert_metrics(metrics)
+            except Exception as e:
+                logger.error(e)
+            finally:
+                await asyncio.sleep(KEEPER_SLEEP_INTERVAL)
         logger.info("Exiting a Keeper loop")
 
     def connect_to_db(self):
@@ -81,10 +86,15 @@ class Keeper:
             self.conn.commit()
         return self
 
-    def fetch_endpoints(self):
-        """Fetch URLs to be monitored from a DB table."""
+    def fetch_endpoints(self, partition_count: int, partition_id: int):
+        """Fetch URLs to be monitored from a DB table.
+        Multiple instances of this program can be run to utilize multiple cores.
+        Each instance will fetch a different set of URLs.
+        """
         self.cursor.execute(
-            f"SELECT endpoint_id, url, regex, interval FROM {ENDPOINTS_TABLE_NAME};"
+            f"""SELECT endpoint_id, url, regex, interval FROM 
+            {ENDPOINTS_TABLE_NAME} 
+            where endpoint_id % {partition_count} = {partition_id};"""
             )
         rows = self.cursor.fetchall()
         endpoints = []
@@ -104,11 +114,12 @@ class Keeper:
         self.conn.commit()
         self.cursor.execute(f"""
             CREATE TABLE IF NOT EXISTS {METRICS_TABLE_NAME} (
-                start_time TIMESTAMP NOT NULL PRIMARY KEY,
+                start_time TIMESTAMP NOT NULL,
                 endpoint_id integer REFERENCES {ENDPOINTS_TABLE_NAME}(endpoint_id),
                 duration REAL NOT NULL,
                 status_code INT,
-                regex_match BOOLEAN
+                regex_match BOOLEAN,
+                PRIMARY KEY (start_time, endpoint_id)
             );
         """)
         self.conn.commit()
@@ -128,32 +139,41 @@ class Keeper:
 
     def check_readiness(self):
         """Ensure DB tables are ready."""
-        self.connect_to_db()
-        self.assure_endpoint_table()
-        self.assure_metrics_table()
+
+        try:
+            self.connect_to_db()
+            self.assure_endpoint_table()
+            self.assure_metrics_table()
+        except Exception as e:
+            logger.error(e)
+            raise e
         return self
 
     def insert_metrics(self, metrics: [Stat]):
         """Insert metrics into DB."""
         if len(metrics) == 0:
             return
-        # use extras to insert multiple rows
-        psycopg2.extras.execute_values(
-            self.cursor,
-            f"""
-            INSERT INTO {METRICS_TABLE_NAME}
-            (start_time, endpoint_id, duration, status_code, regex_match)
-            VALUES %s;
-            """,
-            [(  datetime.fromtimestamp(metric.start_time, timezone.utc),
-                metric.endpoint.endpoint_id,
-                metric.duration,
-                metric.status_code,
-                metric.regex_match) for metric in metrics],
-            template=None,
-            page_size=1000
-        )
-        self.conn.commit()
+        try:
+            # use extras to insert multiple rows
+            psycopg2.extras.execute_values(
+                self.cursor,
+                f"""
+                INSERT INTO {METRICS_TABLE_NAME}
+                (start_time, endpoint_id, duration, status_code, regex_match)
+                VALUES %s;
+                """,
+                [(  datetime.fromtimestamp(metric.start_time, timezone.utc),
+                    metric.endpoint.endpoint_id,
+                    metric.duration,
+                    metric.status_code,
+                    metric.regex_match) for metric in metrics],
+                template=None,
+                page_size=1000
+            )
+            self.conn.commit()
+        except Exception as e:
+            logger.error(e)
+            self.conn.rollback()
 
     def __del__(self):
         self.cursor.close()

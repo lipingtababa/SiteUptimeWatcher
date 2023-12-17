@@ -1,26 +1,42 @@
 #!/bin/bash
 
-# Run linter
-pylint ./src
-
-# Run unit test
-pytest ./test -v
-
-# conditional execution
-
 if [[ "$RUN_AS" == "TEST_SERVER" ]]; then
-    # Reset the database
-    python test/client/generate_endpoints.py
 
     # start the test server
     uvicorn test.server.test_server:app --host 0.0.0.0 \
     --reload --timeout-keep-alive 305 \
     --log-level error --port 8000
+
+elif [[ "$RUN_AS" == "PREPARER" ]]; then
+    # Assure tables presence
+    python src/prepare_environment.py
+
+    # Generate random endpoints
+    python test/client/generate_endpoints.py
+
 else
-    # Wait for the test server to start
-    sleep 5
+    # get number of cores from the system
+    # and use all but one for the workers
+    CORES=$(( $(nproc --all) - 1 ))
+    if [[ "$CORES" -lt 1 ]]; then
+        CORES=1
+    fi
+    echo "Going to use $CORES cores"
 
-    # Start the server
-    python src/main.py
+    pids=()
+    for ((i=0; i<$CORES; i++)); do
+        # start CORES workers in parallel
+        # set environment variable for each worker
+        export PARTITION_ID=$i
+        export PARTITION_COUNT=$CORES
+        python src/main.py & 
+        pid=($!)
+        echo "Started worker $pid"
+        pids+=("$pid")
+    done
+
+    # wait for all workers to finish
+    for pid in "${pids[@]}"; do
+        wait $pid
+    done
 fi
-
