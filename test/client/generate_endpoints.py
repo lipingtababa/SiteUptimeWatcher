@@ -13,7 +13,7 @@ import psycopg2.extras
 src_directory = Path(__file__).resolve().parent.parent.parent / "src"
 sys.path.append(str(src_directory))
 from utils import load_config_from_file, logger
-from keeper import Keeper, ENDPOINTS_TABLE_NAME
+from keeper import Keeper, ENDPOINTS_TABLE_NAME, PG_BATCH_SIZE
 
 # pylint: disable=too-few-public-methods
 class SiteGenerator(Keeper):
@@ -24,23 +24,30 @@ class SiteGenerator(Keeper):
 
     def generate_endpoints(self):
         """ IMPORTANT! It will erase any existing data in the DB."""
-        self.cursor.execute(f"TRUNCATE table {ENDPOINTS_TABLE_NAME} CASCADE;")
-
-        insert_data = [
-            (f"http://testserver:8000/{i}",
-             ".*welcome",
-             random.randint(5, 30)) for i in range(50000)
-             ]
-        psycopg2.extras.execute_values(
-            self.cursor,
-            f"""
-                INSERT INTO {ENDPOINTS_TABLE_NAME} (url, regex, interval) VALUES %s;
-            """,
-            insert_data,
-            template=None,
-            page_size=1000
-        )
-        self.conn.commit()
+        try:
+            with self.get_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(f"TRUNCATE table {ENDPOINTS_TABLE_NAME} CASCADE;")
+                    insert_data = [
+                        (f"http://testserver:8000/{i}",
+                        ".*welcome",
+                        random.randint(5, 30)) for i in range(50000)
+                        ]
+                    psycopg2.extras.execute_values(
+                        cursor,
+                        f"""
+                            INSERT INTO {ENDPOINTS_TABLE_NAME} (url, regex, interval) VALUES %s;
+                        """,
+                        insert_data,
+                        template=None,
+                        page_size=PG_BATCH_SIZE
+                    )
+                    conn.commit()
+        except Exception as e:
+            logger.error(e)
+            conn.rollback()
+        finally:
+            self.release_connection(conn)
 
 def main():
     """ This is an independent script."""
