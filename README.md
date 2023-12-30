@@ -55,14 +55,13 @@ As mentioned above, OOP is used to increase cohesion within a class and reduce c
 Also, container/shell script are introduced to separate infrastructure code from business logic code so when we redeploy our programe to another runtime platform, the change would be kept within the infrastructure code.
 
 ## Conflict between Performance and Accurancy 
-Although attaining the highest RPS is desirable, it's crucial to ensure the program doesn't significantly contribute to latency or cause request failures Otherwise, instead of monitoring the latency/availability of the target URLs, we would end up monitoring the performance of our own agents.
+Although attaining the highest RPS is desirable, it's crucial to ensure the program doesn't significantly contribute to latency or cause request failures, Otherwise, instead of monitoring the latency/availability of the target URLs, we would end up monitoring the performance of our own agents.
 
 Observability and A/B test can be used to help strike a balance between performance and accurancy. For example, if a localhost URL's latency reaches 5 seconds, it is most likely that the latency comes from the agents, instead of from the targets.
 
 Observabilty and A/B test is an ongoing operation, instead of a single design decision.
 
-However, it is assumed be to acceptable to lose a small amount of time-series data to reduce complexity and infrastructure cost.
-
+My hunch is that the performance bottleneck is with the DB. However, a benchmark is needed to prove/disprove my guessing.
 
 # Implementation
 ## Structure of code
