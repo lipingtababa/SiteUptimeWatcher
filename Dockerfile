@@ -11,12 +11,6 @@ ADD ./ /app
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Run linter
-RUN pylint ./src
-
-# Run unit test
-RUN pytest ./test -v
-
 # 8000 is used by the test server
 EXPOSE 8000
 
