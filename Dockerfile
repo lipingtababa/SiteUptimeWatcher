@@ -9,6 +9,8 @@ WORKDIR /app
 # Add the current directory contents into the container at /app
 ADD ./ /app
 
+RUN pip install --no-cache-dir --upgrade pip
+RUN pip install --no-cache-dir --upgrade Cython==3.0.7
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 8000 is used by the test server
