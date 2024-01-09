@@ -33,7 +33,9 @@ jobs:
         run: |
             aws ecr get-login-password --region ${{env.AWS_REGION }} | docker login --username AWS --password-stdin 339713007259.dkr.ecr.us-east-1.amazonaws.com
             docker tag detector:${{ github.sha }} 339713007259.dkr.ecr.us-east-1.amazonaws.com/detector:${{ github.sha }}
+            docker tag detector:${{ github.sha }} 339713007259.dkr.ecr.us-east-1.amazonaws.com/detector:latest
             docker push 339713007259.dkr.ecr.us-east-1.amazonaws.com/detector:${{ github.sha }}
+            docker push 339713007259.dkr.ecr.us-east-1.amazonaws.com/detector:latest
   deploy:
     needs: build
     runs-on: ubuntu-latest

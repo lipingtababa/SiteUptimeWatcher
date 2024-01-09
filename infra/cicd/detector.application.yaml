@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: detector
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/lipingtababa/detector.git
+    targetRevision: HEAD
+    path: infra/application
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: detector
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+
