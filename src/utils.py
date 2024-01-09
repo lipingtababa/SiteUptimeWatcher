@@ -8,7 +8,7 @@
 import logging
 import os
 from dotenv import load_dotenv
-from detector_expections import EnvException
+from detector_exception import EnvException
 
 # define a constant
 WORKER_KEEPER_RATIO = 5000
