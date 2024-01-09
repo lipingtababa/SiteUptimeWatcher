@@ -12,7 +12,7 @@ import psycopg2.extras
 # To import the Site and Keeper class, we need to add the src directory to the path
 src_directory = Path(__file__).resolve().parent.parent.parent / "src"
 sys.path.append(str(src_directory))
-from utils import load_config_from_file, logger
+from utils import load_config, logger
 from keeper import Keeper, ENDPOINTS_TABLE_NAME, PG_BATCH_SIZE
 
 # pylint: disable=too-few-public-methods
@@ -52,7 +52,7 @@ class SiteGenerator(Keeper):
 def main():
     """ This is an independent script."""
     logger.info("Generating endpoints")
-    load_config_from_file()
+    load_config()
 
     keeper = SiteGenerator()
     keeper.generate_endpoints()

@@ -28,7 +28,6 @@ def test_load_config_from_file():
     assert os.getenv("DB_PORT") == "22047"
     assert os.getenv("DB_NAME") == "MYDB"
     assert os.getenv("DB_USER") == "avnadmin"
-    assert os.getenv("DB_PASSWORD") == "AVNS_1234567890"
 
 def test_load_config_from_file_invalid_port():
     with pytest.raises(EnvException):
@@ -43,4 +42,4 @@ def test_load_config_from_file_missing_variable():
             # assert that the exception is raised and msg is correct
             with pytest.raises(EnvException) as e:
                 load_config_from_file(file = "./test/test_data/env_files/" + file)
-            assert str(e.value) == "DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME must be set"
+            assert str(e.value) == "DB_HOST, DB_PORT, DB_USER, DB_NAME must be set in the file"

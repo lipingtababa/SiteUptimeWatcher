@@ -6,7 +6,7 @@ Load configuration, Ensure DB is ready, Fetch sites from DB and Start monitoring
 import os
 import signal
 import asyncio
-from utils import logger, load_config_from_file, handle_signals, EnvException
+from utils import logger, load_config, handle_signals, EnvException
 from keeper import Keeper
 from worker import Worker
 
@@ -23,7 +23,7 @@ async def main():
                 partition_count)
     signal.signal(signal.SIGINT, handle_signals)
 
-    load_config_from_file()
+    load_config()
     # Read endpoints which are assigned to this process from DB
     keeper = Keeper(None)
     endpoints = keeper.fetch_endpoints(partition_count, partition_id)
