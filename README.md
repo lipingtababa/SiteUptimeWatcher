@@ -1,5 +1,14 @@
-# Cover letter
-I am very fond of Aiven's product and its value proposition, to which I believe I can significantly contribute if given the opportunity to join the team. This is why I completed the assignment, even though I was informed by Irina that the role had been cancelled.
+# What is this?
+This is a program that demostrates
+1. What my coding style is.
+2. How I control quality through linting, unit test and CI/CD.
+3. How I design a software with production quality.
+4. How I use cloud services.
+
+Detector monitors the availability of many websites over the network, produces metrics about these and stores the metrics into an PostgreSQL database.
+
+The detector performs the checks periodically and collects the request timestamp,the response time, the HTTP status code, as well as **optionally** checking the returned page contents for a regex pattern that is expected to be found on the page. 
+Each URL is checked periodically, with the ability to configure the interval(between 5 and 300 seconds) and the regexp on a per-URL basis. The monitored URLs can be anything found online.
 
 # Design: the Desired, the Avoided and the Tradeoff
 
@@ -85,7 +94,7 @@ Concurrency within the program is achieved at three levels:
 5. Requests to PostgreSQL is done with a sync sdk as I don't have the knowledge to evaluate the maturity of the async libraries, like [asyncpg](https://github.com/MagicStack/asyncpg) and [Psycopg 3](https://www.psycopg.org/psycopg3/docs/advanced/async.html).
 
 ## DB Schema
-> Requirement: stores the metrics into an Aiven PostgreSQL database.
+> Requirement: stores the metrics into an PostgreSQL database.
 
 There are 2 tables: a relational table **endpoints** where urls are managed and a timescale hypertable **metrics** which contains the time series data with Timescale plugin.
 
@@ -93,7 +102,6 @@ Please note that **URL** is not used as the primary key since we can have duplic
 - With the same URL, users might specify different regex. 
 - If the application is deployed on Intranet, the same url https://10.0.0.1/index" might point to different endpoints.
 - When a domain name, for example, https://www.netflix.com/browse, resolves to different CDN IPs, they should be treated as different endpoints.
-- If Aiven provides url-monitoring-as-a-service and 2 users might specify the same URL and Aiven should be able to distinguish them.
 
 ## Security
 As discussed in the previous email, although it is not a good practice to hardcode the DB credentials in a [.env file](./.env), this approach was thought to be acceptable for the purposes of an assignment.
