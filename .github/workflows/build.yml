@@ -36,6 +36,10 @@ jobs:
             docker tag detector:${{ github.sha }} 339713007259.dkr.ecr.us-east-1.amazonaws.com/detector:latest
             docker push 339713007259.dkr.ecr.us-east-1.amazonaws.com/detector:${{ github.sha }}
             docker push 339713007259.dkr.ecr.us-east-1.amazonaws.com/detector:latest
+      - name: Push secrets
+        run: |
+            aws secretsmanager put-secret-value --secret-id "/detector/postgre/password" --secret-string ${{ secrets.DB_PASSWORD }} --region ${{env.AWS_REGION }}
+  
   deploy:
     needs: build
     runs-on: ubuntu-latest
