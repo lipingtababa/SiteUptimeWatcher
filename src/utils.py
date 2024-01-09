@@ -7,9 +7,9 @@
 
 import logging
 import os
+import boto3
 from dotenv import load_dotenv
 from detector_exception import EnvException
-import boto3
 
 # define a constant
 WORKER_KEEPER_RATIO = 5000
@@ -55,10 +55,10 @@ def load_config_from_file(file =".env"):
 
 def load_secrets_from_secrets_manager():
     """Load secrets from aws secrets manager."""
-    client = boto3.client('secretsmanager')
+    client = boto3.client('secretsmanager', region_name='us-east-1')
     response = client.get_secret_value(SecretId='/detector/postgre/password')
     os.environ["DB_PASSWORD"] = response['SecretString']
-    
+
 def load_config():
     """Load configuration from .env or a specified file."""
     load_config_from_file()
