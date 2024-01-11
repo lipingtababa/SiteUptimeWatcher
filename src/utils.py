@@ -9,7 +9,7 @@ import logging
 import os
 import boto3
 from dotenv import load_dotenv
-from detector_exception import EnvException
+from watcher_exception import EnvException
 
 # define a constant
 WORKER_KEEPER_RATIO = 5000

@@ -3,5 +3,5 @@ provider "aws" {
 }
 
 resource "aws_secretsmanager_secret" "default" {
-  name = "/detector/postgre/password"
+  name = "/watcher/postgre/password"
 }

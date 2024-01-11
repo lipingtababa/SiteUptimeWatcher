@@ -5,9 +5,9 @@ This is a program that demostrates
 3. How I design a software with production quality.
 4. How I use cloud services.
 
-Detector monitors the availability of many websites over the network, produces metrics about these and stores the metrics into an PostgreSQL database.
+Watcher monitors the availability of many websites over the network, produces metrics about these and stores the metrics into an PostgreSQL database.
 
-The detector performs the checks periodically and collects the request timestamp,the response time, the HTTP status code, as well as **optionally** checking the returned page contents for a regex pattern that is expected to be found on the page. 
+Watcher performs the checks periodically and collects the request timestamp,the response time, the HTTP status code, as well as **optionally** checking the returned page contents for a regex pattern that is expected to be found on the page. 
 Each URL is checked periodically, with the ability to configure the interval(between 5 and 300 seconds) and the regexp on a per-URL basis. The monitored URLs can be anything found online.
 
 # Design: the Desired, the Avoided and the Tradeoff

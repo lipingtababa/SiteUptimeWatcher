@@ -11,7 +11,7 @@ import pytest
 src_directory = Path(__file__).resolve().parent.parent / "src"
 sys.path.append(str(src_directory))
 from utils import load_config_from_file
-from detector_exception import EnvException
+from watcher_exception import EnvException
 
 @pytest.fixture(autouse=True)
 def clear_db_env_vars_fixture():

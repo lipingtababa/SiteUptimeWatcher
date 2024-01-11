@@ -8,7 +8,7 @@ services:
       volumes:
         - .:/app
       networks:
-        - detector-network
+        - watcher-network
       environment:
         - RUN_AS=PREPARER
 
@@ -22,11 +22,11 @@ services:
     ports:
       - 8000:8000
     networks:
-      - detector-network
+      - watcher-network
     environment:
       - RUN_AS=TEST_SERVER
 
-  detector:
+  watcher:
     restart: no
     build:
       context: .
@@ -35,11 +35,11 @@ services:
     volumes:
       - .:/app
     networks:
-      - detector-network
+      - watcher-network
     depends_on:
       preparer:
         condition: service_completed_successfully
 
 networks:
-  detector-network:
+  watcher-network:
     driver: bridge

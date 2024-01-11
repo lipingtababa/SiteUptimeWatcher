@@ -1,24 +1,25 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: detector
+  name: watcher
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: detector-deployment
-  namespace: detector
+  name: watcher-deployment
+  namespace: watcher
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: detector
+      app: watcher
   template:
     metadata:
       labels:
-        app: detector
+        app: watcher
     spec:
+      serviceAccountName: watcher-service
       containers:
-      - name: detector
-        image: 339713007259.dkr.ecr.us-east-1.amazonaws.com/detector:latest
+      - name: watcher
+        image: 339713007259.dkr.ecr.us-east-1.amazonaws.com/watcher:latest

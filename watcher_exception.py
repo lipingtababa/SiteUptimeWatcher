@@ -1,5 +1,5 @@
 """
-This file contains the custom exceptions for the detector.
+This file contains the custom exceptions for watcher.
 """
 class EnvException(Exception):
     """
