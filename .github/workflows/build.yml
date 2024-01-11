@@ -39,10 +39,3 @@ jobs:
       - name: Push secrets
         run: |
             aws secretsmanager put-secret-value --secret-id "/watcher/postgre/password" --secret-string ${{ secrets.DB_PASSWORD }} --region ${{env.AWS_REGION }}
-  
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Get repo
-        run: echo "The ${{ github.repository }} repository has been cloned to the runner."
