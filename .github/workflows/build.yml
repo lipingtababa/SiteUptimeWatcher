@@ -26,7 +26,7 @@ jobs:
       - name: Configure aws credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
-          role-to-assume: arn:aws:iam::339713007259:role/github
+          role-to-assume: arn:aws:iam::339713007259:role/github-action
           role-session-name: github
           aws-region: ${{ env.AWS_REGION }}
       - name: Push Docker image

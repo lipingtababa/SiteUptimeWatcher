@@ -2,7 +2,14 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: watcher
-
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: watcher-service
+  namespace: watcher
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::339713007259:role/watcher-pod-role
 ---
 apiVersion: apps/v1
 kind: Deployment
