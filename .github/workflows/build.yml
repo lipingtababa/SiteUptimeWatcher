@@ -6,6 +6,7 @@ permissions:
 env:
     AWS_REGION: us-east-1
     IMAGE_TAG: ${{ github.sha }}
+    AWS_ACCOUNT: 339713007259
 on: [push]
 jobs:
   build:
@@ -29,13 +30,15 @@ jobs:
           role-to-assume: arn:aws:iam::339713007259:role/github-action
           role-session-name: github
           aws-region: ${{ env.AWS_REGION }}
+
       - name: Push Docker image
         run: |
-            aws ecr get-login-password --region ${{env.AWS_REGION }} | docker login --username AWS --password-stdin 339713007259.dkr.ecr.us-east-1.amazonaws.com
-            docker tag watcher:${{ github.sha }} 339713007259.dkr.ecr.us-east-1.amazonaws.com/watcher:${{ github.sha }}
-            docker tag watcher:${{ github.sha }} 339713007259.dkr.ecr.us-east-1.amazonaws.com/watcher:latest
-            docker push 339713007259.dkr.ecr.us-east-1.amazonaws.com/watcher:${{ github.sha }}
-            docker push 339713007259.dkr.ecr.us-east-1.amazonaws.com/watcher:latest
+            aws ecr get-login-password --region ${{env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{env.AWS_REGION }}.amazonaws.com
+            docker tag watcher:${{ env.IMAGE_TAG }} ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{env.AWS_REGION }}.amazonaws.com/watcher:${{ env.IMAGE_TAG }}
+            docker tag watcher:${{ env.IMAGE_TAG }} ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{env.AWS_REGION }}.amazonaws.com/watcher:latest
+            docker push ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{env.AWS_REGION }}.amazonaws.com/watcher:${{ env.IMAGE_TAG }}
+            docker push ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{env.AWS_REGION }}.amazonaws.com/watcher:latest
+
       - name: Push secrets
         run: |
             aws secretsmanager put-secret-value --secret-id "/watcher/postgre/password" --secret-string ${{ secrets.DB_PASSWORD }} --region ${{env.AWS_REGION }}
