@@ -16,7 +16,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker build -t watcher:${{ env.IMAGE_TAG }} .
+        run: |
+            docker buildx create --name arm64-builder --use
+            docker buildx build --platform linux/amd64,linux/arm64 -t watcher:${{ env.IMAGE_TAG }} .
 
       - name: Run pytest
         run: docker run watcher:${{ env.IMAGE_TAG }} pytest ./test -v
