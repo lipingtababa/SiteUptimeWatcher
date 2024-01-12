@@ -10,8 +10,7 @@ import pytest
 # To import the src code, we need to add the src directory to the path
 src_directory = Path(__file__).resolve().parent.parent / "src"
 sys.path.append(str(src_directory))
-from utils import load_config_from_file
-from watcher_exception import EnvException
+from utils import load_config_from_file, EnvException
 
 @pytest.fixture(autouse=True)
 def clear_db_env_vars_fixture():

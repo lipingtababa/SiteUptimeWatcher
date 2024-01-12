@@ -9,14 +9,20 @@ import logging
 import os
 import boto3
 from dotenv import load_dotenv
-from watcher_exception import EnvException
 
 # define a constant
 WORKER_KEEPER_RATIO = 5000
 KEEPER_SLEEP_INTERVAL = 0.2
 
-
 RUNNING_STATUS = True
+
+class EnvException(Exception):
+    """
+    Raised if required environment variables are not set or invalid.
+    """
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
 
 # install a signal handler
 # pylint: disable=unused-argument, global-statement
