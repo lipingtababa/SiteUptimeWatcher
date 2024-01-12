@@ -61,6 +61,8 @@ def load_config_from_file(file =".env"):
 
 def load_secrets_from_secrets_manager():
     """Load secrets from aws secrets manager."""
+    if os.environ.get("DB_PASSWORD") is not None:
+        return
     client = boto3.client('secretsmanager', region_name='us-east-1')
     response = client.get_secret_value(SecretId='/detector/postgre/password')
     os.environ["DB_PASSWORD"] = response['SecretString']
