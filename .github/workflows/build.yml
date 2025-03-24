@@ -6,7 +6,7 @@ permissions:
 env:
     AWS_REGION: us-east-1
     IMAGE_TAG: ${{ github.sha }}
-    AWS_ACCOUNT: 339713007259
+    AWS_ACCOUNT: 954976318202
 on: [push]
 jobs:
   build:
@@ -32,7 +32,7 @@ jobs:
       - name: Configure aws credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
-          role-to-assume: arn:aws:iam::339713007259:role/github-action
+          role-to-assume: arn:aws:iam::954976318202:role/github-action
           role-session-name: github
           aws-region: ${{ env.AWS_REGION }}
 
