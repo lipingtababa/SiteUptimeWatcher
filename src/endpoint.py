@@ -14,7 +14,7 @@ class Endpoint:
         assert endpoint_id, "id is required"
         assert url, "url is required"
         assert interval, "interval is required"
-        assert 5 <= interval <= 300, "interval must be greater than 0"
+        assert 5 <= interval <= 300, "interval must be greater than 5 and less than 300"
 
         self.endpoint_id = endpoint_id
         self.url = url
