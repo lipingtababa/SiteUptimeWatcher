@@ -2,11 +2,22 @@ data "aws_vpc" "default" {
   default = true
 }
 
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+  filter {
+    name   = "default-for-az"
+    values = ["true"]
+  }
+}
+
 resource "aws_eks_cluster" "idp" {
   name = "idp"
   role_arn = aws_iam_role.idp_node_role.arn
   vpc_config {
-    subnet_ids = ["subnet-005a8db3663329ec9", "subnet-085f21f00fe245cda", "subnet-097c8eb90c15f52be"]
+    subnet_ids = data.aws_subnets.default.ids
     security_group_ids = [aws_security_group.cluster_sg.id]
   }
 }
@@ -111,7 +122,7 @@ resource "aws_eks_node_group" "idp_node_group" {
   cluster_name    = aws_eks_cluster.idp.name
   node_group_name = "idp_node_group"
   node_role_arn   = aws_iam_role.idp_node_role.arn
-  subnet_ids      = ["subnet-005a8db3663329ec9", "subnet-085f21f00fe245cda", "subnet-097c8eb90c15f52be"]
+  subnet_ids      = data.aws_subnets.default.ids
   scaling_config {
     desired_size = 1
     max_size     = 2
