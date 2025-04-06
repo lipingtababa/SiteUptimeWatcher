@@ -7,6 +7,8 @@ env:
     AWS_REGION: us-east-1
     IMAGE_TAG: ${{ github.sha }}
     AWS_ACCOUNT: 954976318202
+    EKS_CLUSTER: idp
+    NAMESPACE: watcher
 on: 
   push:
   workflow_call:
@@ -17,8 +19,6 @@ on:
         type: string
         default: ${{ github.sha }}
     secrets:
-      AWS_ACCOUNT:
-        required: true
       AWS_REGION:
         required: true
 
@@ -46,14 +46,14 @@ jobs:
       - name: Configure aws credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
-          role-to-assume: arn:aws:iam::954976318202:role/github-action
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT }}:role/github-action
           role-session-name: github
-          aws-region: ${{ secrets.AWS_REGION || env.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Push Docker image
         run: |
-            aws ecr get-login-password --region ${{ secrets.AWS_REGION || env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT || env.AWS_ACCOUNT }}.dkr.ecr.${{ secrets.AWS_REGION || env.AWS_REGION }}.amazonaws.com
-            docker tag watcher:${{ inputs.image_tag || env.IMAGE_TAG }} ${{ secrets.AWS_ACCOUNT || env.AWS_ACCOUNT }}.dkr.ecr.${{ secrets.AWS_REGION || env.AWS_REGION }}.amazonaws.com/watcher:${{ inputs.image_tag || env.IMAGE_TAG }}
-            docker tag watcher:${{ inputs.image_tag || env.IMAGE_TAG }} ${{ secrets.AWS_ACCOUNT || env.AWS_ACCOUNT }}.dkr.ecr.${{ secrets.AWS_REGION || env.AWS_REGION }}.amazonaws.com/watcher:latest
-            docker push ${{ secrets.AWS_ACCOUNT || env.AWS_ACCOUNT }}.dkr.ecr.${{ secrets.AWS_REGION || env.AWS_REGION }}.amazonaws.com/watcher:${{ inputs.image_tag || env.IMAGE_TAG }}
-            docker push ${{ secrets.AWS_ACCOUNT || env.AWS_ACCOUNT }}.dkr.ecr.${{ secrets.AWS_REGION || env.AWS_REGION }}.amazonaws.com/watcher:latest
+            aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+            docker tag watcher:${{ inputs.image_tag || env.IMAGE_TAG }} ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/watcher:${{ inputs.image_tag || env.IMAGE_TAG }}
+            docker tag watcher:${{ inputs.image_tag || env.IMAGE_TAG }} ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/watcher:latest
+            docker push ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/watcher:${{ inputs.image_tag || env.IMAGE_TAG }}
+            docker push ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/watcher:latest
