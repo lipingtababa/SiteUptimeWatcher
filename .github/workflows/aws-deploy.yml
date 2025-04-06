@@ -5,11 +5,12 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: watcher
-  EKS_CLUSTER: amazing-blues-rainbow
+  EKS_CLUSTER: idp
   NAMESPACE: watcher
   AWS_ACCOUNT: 954976318202
   ARGOCD_APP_NAME: watcher
@@ -37,22 +38,30 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
-          role-to-assume: arn:aws:iam::339713007259:role/github-action
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT }}:role/github-action
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Update kubeconfig
         run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER }} --region ${{ env.AWS_REGION }}
 
-      - name: Update ArgoCD application
+      - name: Create namespace if not exists
+        run: kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Update deployment
         run: |
-          # Update the image in the deployment
-          kubectl set image deployment/watcher-deployment -n ${{ env.NAMESPACE }} watcher=${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          # Check if deployment exists
+          if kubectl get deployment watcher -n ${{ env.NAMESPACE }} &> /dev/null; then
+            # Update the image in the existing deployment
+            kubectl set image deployment/watcher -n ${{ env.NAMESPACE }} watcher=${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          else
+            # Apply the deployment if it doesn't exist
+            kubectl apply -f infra/application/watcher.deployment.yaml
+            # Update the image
+            kubectl set image deployment/watcher -n ${{ env.NAMESPACE }} watcher=${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          fi
           
-          # Sync the ArgoCD application
-          kubectl patch application ${{ env.ARGOCD_APP_NAME }} -n argocd --type merge -p '{"metadata":{"annotations":{"argocd.argoproj.io/refresh":"true"}}}'
-          
-          # Wait for ArgoCD sync to complete
-          kubectl wait --for=condition=Available deployment/watcher-deployment -n ${{ env.NAMESPACE }} --timeout=300s
+          # Wait for deployment to be ready
+          kubectl rollout status deployment/watcher -n ${{ env.NAMESPACE }} --timeout=300s
             
       - name: Notify deployment status
         if: always()
@@ -61,9 +70,13 @@ jobs:
           script: |
             const status = ${{ job.status }} === 'success' ? '✅' : '❌';
             const message = `Deployment ${status} to AWS\nCommit: ${{ github.sha }}\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: message
-            });
+            
+            // Only create a comment if this is a PR
+            if (context.issue.number) {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: message
+              });
+            }

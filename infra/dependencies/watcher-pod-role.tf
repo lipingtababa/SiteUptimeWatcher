@@ -1,5 +1,5 @@
 resource "aws_iam_role" "watcher_pod_role" {
-  name = "watcher"
+  name = "watcher-pod-role"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -20,9 +20,9 @@ resource "aws_iam_role" "watcher_pod_role" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "watcher_pod_role_read_secret" {
+resource "aws_iam_role_policy_attachment" "watcher_pod_role_read_ssm" {
   role       = aws_iam_role.watcher_pod_role.name
-  policy_arn = aws_iam_policy.secret_reader_policy.arn
+  policy_arn = aws_iam_policy.ssm_reader_policy.arn
 }
 
 resource "aws_iam_role_policy_attachment" "watcher_pod_role_access_s3" {

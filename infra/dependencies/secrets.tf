@@ -12,44 +12,63 @@ variable "aws_account" {
   default = "954976318202"
 }
 
-resource "aws_secretsmanager_secret" "default" {
-  name = "/watcher/postgre/password"
+# SSM Parameter for PostgreSQL password
+resource "aws_ssm_parameter" "postgres_password" {
+  name  = "/watcher/postgre/password"
+  type  = "SecureString"
+  value = "placeholder" # This will be updated by the application
   tags = {
     Environment = "production"
     Project     = "watcher"
   }
 }
 
-resource "aws_iam_policy" "secret_reader_policy" {
-  name = "secret_reader_policy"
+# SSM Parameter for ArgoCD admin password
+resource "aws_ssm_parameter" "argocd_password" {
+  name  = "/watcher/argocd/admin-password"
+  type  = "SecureString"
+  value = "placeholder" # This will be updated during cluster setup
+  tags = {
+    Environment = "production"
+    Project     = "watcher"
+  }
+}
+
+# IAM policy for reading SSM parameters
+resource "aws_iam_policy" "ssm_reader_policy" {
+  name = "ssm_reader_policy"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Action = [
-          "secretsmanager:GetSecretValue"
+          "ssm:GetParameter",
+          "ssm:GetParameters"
         ]
         Effect = "Allow"
         Resource = [
-          aws_secretsmanager_secret.default.arn
+          aws_ssm_parameter.postgres_password.arn,
+          aws_ssm_parameter.argocd_password.arn
         ]
       }
     ]
   })
 }
 
-resource "aws_iam_policy" "secret_writer_policy" {
-  name = "secret_writer_policy"
+# IAM policy for writing SSM parameters
+resource "aws_iam_policy" "ssm_writer_policy" {
+  name = "ssm_writer_policy"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Action = [
-          "secretsmanager:PutSecretValue"
+          "ssm:PutParameter"
         ]
         Effect = "Allow"
         Resource = [
-          aws_secretsmanager_secret.default.arn
+          aws_ssm_parameter.postgres_password.arn,
+          aws_ssm_parameter.argocd_password.arn
         ]
       }
     ]

@@ -9,12 +9,12 @@ metadata:
   name: watcher-service
   namespace: watcher
   annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::339713007259:role/watcher-pod-role
+    eks.amazonaws.com/role-arn: arn:aws:iam::954976318202:role/watcher-pod-role
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: watcher-deployment
+  name: watcher
   namespace: watcher
 spec:
   replicas: 1
@@ -25,8 +25,21 @@ spec:
     metadata:
       labels:
         app: watcher
+      annotations:
+        eks.amazonaws.com/role-arn: arn:aws:iam::954976318202:role/watcher-pod-role
     spec:
       serviceAccountName: watcher-service
       containers:
       - name: watcher
-        image: 339713007259.dkr.ecr.us-east-1.amazonaws.com/watcher:latest
+        image: 954976318202.dkr.ecr.us-east-1.amazonaws.com/watcher:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: AWS_REGION
+          value: us-east-1
+        - name: AWS_ACCOUNT
+          value: "954976318202"
+        - name: EKS_CLUSTER
+          value: idp
+        - name: NAMESPACE
+          value: watcher

@@ -8,6 +8,8 @@ import logging
 import os
 import boto3
 from dotenv import load_dotenv
+import json
+from botocore.exceptions import ClientError
 
 # define a constant
 WORKER_KEEPER_RATIO = 5000
@@ -59,12 +61,21 @@ def load_config_from_file(file =".env"):
         raise EnvException("DB_PORT must be an integer")
 
 def load_secrets_from_secrets_manager():
-    """Load secrets from aws secrets manager."""
-    if os.environ.get("DB_PASSWORD") is not None:
-        return
-    client = boto3.client('secretsmanager', region_name='us-east-1')
-    response = client.get_secret_value(SecretId='/watcher/postgre/password')
-    os.environ["DB_PASSWORD"] = response['SecretString']
+    """Load secrets from AWS SSM Parameter Store."""
+    session = boto3.session.Session()
+    client = session.client(
+        service_name='ssm',
+        region_name='us-east-1'
+    )
+    try:
+        parameter = client.get_parameter(
+            Name='/watcher/postgre/password',
+            WithDecryption=True
+        )
+        return parameter['Parameter']['Value']
+    except ClientError as e:
+        logger.error(f"Error retrieving parameter: {e}")
+        return None
 
 def load_config():
     """Load configuration from .env or a specified file."""

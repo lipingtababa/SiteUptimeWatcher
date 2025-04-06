@@ -8,6 +8,10 @@ data "aws_subnets" "default" {
     values = [data.aws_vpc.default.id]
   }
   filter {
+    name   = "availability-zone"
+    values = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  }
+  filter {
     name   = "default-for-az"
     values = ["true"]
   }
