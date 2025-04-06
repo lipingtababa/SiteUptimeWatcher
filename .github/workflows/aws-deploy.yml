@@ -1,0 +1,69 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: watcher
+  EKS_CLUSTER: amazing-blues-rainbow
+  NAMESPACE: watcher
+  AWS_ACCOUNT: 954976318202
+  ARGOCD_APP_NAME: watcher
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      image_tag: ${{ github.sha }}
+    secrets: inherit
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::339713007259:role/github-action
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER }} --region ${{ env.AWS_REGION }}
+
+      - name: Update ArgoCD application
+        run: |
+          # Update the image in the deployment
+          kubectl set image deployment/watcher-deployment -n ${{ env.NAMESPACE }} watcher=${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          
+          # Sync the ArgoCD application
+          kubectl patch application ${{ env.ARGOCD_APP_NAME }} -n argocd --type merge -p '{"metadata":{"annotations":{"argocd.argoproj.io/refresh":"true"}}}'
+          
+          # Wait for ArgoCD sync to complete
+          kubectl wait --for=condition=Available deployment/watcher-deployment -n ${{ env.NAMESPACE }} --timeout=300s
+            
+      - name: Notify deployment status
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const status = ${{ job.status }} === 'success' ? '✅' : '❌';
+            const message = `Deployment ${status} to AWS\nCommit: ${{ github.sha }}\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });

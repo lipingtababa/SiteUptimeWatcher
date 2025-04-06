@@ -84,7 +84,31 @@ Please note that **URL** is not used as the primary key since we can have duplic
 - When a domain name, for example, https://www.netflix.com/browse, resolves to different CDN IPs, they should be treated as different endpoints.
 
 ## Security
-As discussed in the previous email, although it is not a good practice to hardcode the DB credentials in a [.env file](./.env), this approach was thought to be acceptable for the purposes of an assignment.
+As our system accesses public resources only at this moment, security design focus on:
+
+1. **Database Security**
+   - Credentials should never be hardcoded.
+   - Connection pooling with configurable limits. TBD
+   - Prepared statements to prevent SQL injection. TBD
+   - TimescaleDB's built-in security features for time-series data.
+
+2. **Container Security**
+   - Minimal base image (python:3.11.0).
+   - No unnecessary packages installed.
+   - Non-root user execution.
+   - Read-only file system where possible.
+
+3. **Network Security**
+   - HTTPS-only endpoints. TBD
+   - Configurable timeout settings.
+   - Rate limiting per endpoint. TBD
+   - TLS verification enabled. TBD
+
+4. **Authentication & Authorization**
+   - OIDC integration with AWS for CI/CD.
+   - Role-based access control for AWS resources.
+   - Secure secret management through AWS Secrets Manager.
+
 
 # Future Work
 - Add unit test cases for SQL DDL and DML.
