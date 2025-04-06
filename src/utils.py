@@ -1,4 +1,3 @@
-
 """This module contains some functions that
 1. initialize logger
 2. load configuration from .env
@@ -64,7 +63,7 @@ def load_secrets_from_secrets_manager():
     if os.environ.get("DB_PASSWORD") is not None:
         return
     client = boto3.client('secretsmanager', region_name='us-east-1')
-    response = client.get_secret_value(SecretId='/detector/postgre/password')
+    response = client.get_secret_value(SecretId='/watcher/postgre/password')
     os.environ["DB_PASSWORD"] = response['SecretString']
 
 def load_config():
