@@ -1,5 +1,5 @@
 resource "aws_iam_role" "github_action_role" {
-  name = "github-action-v2"
+  name = "github-action"
   description = "Used by github workflow"
 
   assume_role_policy = jsonencode({
