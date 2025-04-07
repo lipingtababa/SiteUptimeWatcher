@@ -33,10 +33,19 @@ jobs:
       - name: Prepare QEMU
         uses: docker/setup-qemu-action@v1
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build Docker image
-        run: |
-            docker buildx create --name arm64-builder --use
-            docker buildx build --platform linux/arm64 --load -t watcher:${{ inputs.image_tag || env.IMAGE_TAG }} .
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/arm64
+          push: false
+          load: true
+          tags: |
+            watcher:${{ inputs.image_tag || env.IMAGE_TAG }}
+            watcher:latest
 
       - name: Run pytest
         run: docker run watcher:${{ inputs.image_tag || env.IMAGE_TAG }} pytest ./test -v
@@ -51,10 +60,16 @@ jobs:
           role-session-name: github
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
       - name: Push Docker image
-        run: |
-            aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
-            docker tag watcher:${{ inputs.image_tag || env.IMAGE_TAG }} ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ inputs.image_tag || env.IMAGE_TAG }}
-            docker tag watcher:${{ inputs.image_tag || env.IMAGE_TAG }} ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
-            docker push ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ inputs.image_tag || env.IMAGE_TAG }}
-            docker push ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/arm64
+          push: true
+          tags: |
+            ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ inputs.image_tag || env.IMAGE_TAG }}
+            ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
