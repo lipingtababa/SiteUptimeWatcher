@@ -9,8 +9,10 @@ on:
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: watcher
-  ECR_REGISTRY: 954976318202.dkr.ecr.us-east-1.amazonaws.com
+  AWS_ACCOUNT: 954976318202
   IMAGE_TAG: ${{ github.sha }}
+  EKS_CLUSTER: idp
+  NAMESPACE: watcher
 
 jobs:
   build-and-push:
@@ -40,8 +42,10 @@ jobs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        role-to-assume: arn:aws:iam::954976318202:role/github-actions
-        aws-region: ${{ env.AWS_REGION }}
+        role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT }}:role/github-action
+        role-session-name: github
+        aws-region: us-east-1
+        audience: sts.amazonaws.com
 
     - name: Login to Amazon ECR
       id: login-ecr
@@ -57,7 +61,7 @@ jobs:
         platforms: linux/arm64
         push: true
         tags: |
-          ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
-          ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
+          ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
