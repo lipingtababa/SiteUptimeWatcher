@@ -31,7 +31,7 @@ spec:
       - name: watcher
         image: 954976318202.dkr.ecr.us-east-1.amazonaws.com/watcher:latest
         ports:
-        - containerPort: 8080
+        - containerPort: 8000
         env:
         - name: AWS_REGION
           value: us-east-1
