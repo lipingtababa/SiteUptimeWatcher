@@ -97,30 +97,18 @@ else
         --region "$AWS_REGION"
 fi
 
-# Patch ArgoCD service to use LoadBalancer
-echo "🔧 Patching ArgoCD service to use LoadBalancer..."
-kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+# Patch ArgoCD service to use NodePort
+echo "🔧 Patching ArgoCD service to use NodePort..."
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}'
 
-# Wait for the LoadBalancer to be provisioned
-echo "⏳ Waiting for ArgoCD LoadBalancer to be provisioned..."
-echo "This may take a few minutes..."
-for i in {1..30}; do
-    if kubectl get svc argocd-server -n argocd -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null | grep -q "amazonaws.com"; then
-        echo "✅ LoadBalancer provisioned successfully!"
-        break
-    fi
-    echo "Waiting for LoadBalancer to be provisioned... ($i/30)"
-    sleep 10
-done
-
-# Get the LoadBalancer URL
-echo "🔍 Getting ArgoCD LoadBalancer URL..."
-ARGOCD_URL=$(kubectl get svc argocd-server -n argocd -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-if [ -z "$ARGOCD_URL" ]; then
-    echo "⚠️ Could not get LoadBalancer URL. You may need to check the service status manually."
+# Get the NodePort
+echo "🔍 Getting ArgoCD NodePort..."
+ARGOCD_PORT=$(kubectl get svc argocd-server -n argocd -o jsonpath='{.spec.ports[0].nodePort}')
+if [ -z "$ARGOCD_PORT" ]; then
+    echo "⚠️ Could not get NodePort. You may need to check the service status manually."
     echo "Run: kubectl get svc argocd-server -n argocd"
 else
-    echo "🌐 ArgoCD UI will be available at: https://$ARGOCD_URL"
+    echo "🌐 ArgoCD UI will be available at: https://localhost:$ARGOCD_PORT"
 fi
 
 # Deploy the watcher application
@@ -135,8 +123,8 @@ else
 fi
 
 echo "✅ Cluster setup completed successfully!"
-if [ -n "$ARGOCD_URL" ]; then
-    echo "🌐 ArgoCD UI will be available at: https://$ARGOCD_URL"
+if [ -n "$ARGOCD_PORT" ]; then
+    echo "🌐 ArgoCD UI will be available at: https://localhost:$ARGOCD_PORT"
 else
     echo "⚠️ Could not determine ArgoCD UI URL. You may need to check the service status manually."
     echo "Run: kubectl get svc argocd-server -n argocd"
