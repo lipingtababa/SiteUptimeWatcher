@@ -31,7 +31,7 @@ spec:
       serviceAccountName: watcher-service
       containers:
       - name: watcher
-        image: watcher:latest
+        image: watcher
         ports:
         - containerPort: 8000
         env:

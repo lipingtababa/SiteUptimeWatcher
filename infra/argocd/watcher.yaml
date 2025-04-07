@@ -3,6 +3,11 @@ kind: Application
 metadata:
   name: watcher
   namespace: argocd
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: watcher=954976318202.dkr.ecr.us-east-1.amazonaws.com/watcher
+    argocd-image-updater.argoproj.io/watcher.pull-policy: IfNotPresent
+    argocd-image-updater.argoproj.io/watcher.force-update: "true"
+    argocd-image-updater.argoproj.io/watcher.allow-tags: latest
 spec:
   project: default
   source:
