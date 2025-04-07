@@ -6,9 +6,8 @@
 
 import logging
 import os
-import boto3
 from dotenv import load_dotenv
-import json
+import boto3
 from botocore.exceptions import ClientError
 
 # define a constant
@@ -18,9 +17,7 @@ KEEPER_SLEEP_INTERVAL = 0.2
 RUNNING_STATUS = True
 
 class EnvException(Exception):
-    """
-    Raised if required environment variables are not set or invalid.
-    """
+    """Raised if required environment variables are not set or invalid."""
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)
@@ -39,7 +36,7 @@ def init_logger():
     handler = logging.StreamHandler()
     formatter = logging.Formatter(
         '%(asctime)s - %(process)d - %(filename)s:%(lineno)d - %(levelname)s - %(message)s'
-        )
+    )
     handler.setFormatter(formatter)
     thelogger.addHandler(handler)
     return thelogger
@@ -64,8 +61,8 @@ def load_secrets_from_secrets_manager():
     """Load secrets from AWS SSM Parameter Store."""
     session = boto3.session.Session()
     client = session.client(
-        service_name='ssm',
-        region_name='us-east-1'
+    service_name='ssm',
+    region_name='us-east-1'
     )
     try:
         parameter = client.get_parameter(
