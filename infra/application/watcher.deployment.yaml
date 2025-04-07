@@ -16,6 +16,8 @@ kind: Deployment
 metadata:
   name: watcher
   namespace: watcher
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=true
 spec:
   replicas: 1
   selector:
@@ -29,7 +31,7 @@ spec:
       serviceAccountName: watcher-service
       containers:
       - name: watcher
-        image: 954976318202.dkr.ecr.us-east-1.amazonaws.com/watcher:latest
+        image: 954976318202.dkr.ecr.us-east-1.amazonaws.com/watcher:${IMAGE_TAG}
         ports:
         - containerPort: 8000
         env:
