@@ -77,11 +77,11 @@ def get_ssm_parameter(param_name, with_decryption=True):
 def load_secrets_from_secrets_manager():
     """Load secrets from AWS SSM Parameter Store."""
     # Get database connection parameters from SSM
-    db_host = get_ssm_parameter('/watcher/db/host')
-    db_port = get_ssm_parameter('/watcher/db/port')
-    db_name = get_ssm_parameter('/watcher/db/name')
-    db_user = get_ssm_parameter('/watcher/db/user')
-    db_password = get_ssm_parameter('/watcher/db/password', with_decryption=True)
+    db_host = get_ssm_parameter('/watcher/postgre/host')
+    db_port = get_ssm_parameter('/watcher/postgre/port')
+    db_name = get_ssm_parameter('/watcher/postgre/name')
+    db_user = get_ssm_parameter('/watcher/postgre/user')
+    db_password = get_ssm_parameter('/watcher/postgre/password', with_decryption=True)
 
     if all([db_host, db_port, db_name, db_user, db_password]):
         os.environ["DB_HOST"] = db_host
