@@ -77,4 +77,8 @@ def load_secrets_from_secrets_manager():
 def load_config():
     """Load configuration from .env or a specified file."""
     load_config_from_file()
-    load_secrets_from_secrets_manager()
+    password = load_secrets_from_secrets_manager()
+    if password:
+        os.environ["DB_PASSWORD"] = password
+    else:
+        raise EnvException("Failed to retrieve database password from SSM Parameter Store")

@@ -3,6 +3,16 @@
 # Exit on error
 set -e
 
+# Check if database password is provided
+if [ -z "$1" ]; then
+    echo "Error: Database password is required."
+    echo "Usage: $0 <database_password>"
+    exit 1
+fi
+
+# Store database password
+DB_PASSWORD="$1"
+
 # Load environment variables
 export AWS_REGION="us-east-1"
 export AWS_ACCOUNT="954976318202"
@@ -50,6 +60,15 @@ terraform plan -out=tfplan
 # Apply Terraform changes
 echo "🔨 Applying Terraform changes..."
 terraform apply -auto-approve tfplan
+
+# Store database password in SSM Parameter Store after infrastructure is ready
+echo "🔑 Storing database password in SSM Parameter Store..."
+aws ssm put-parameter \
+    --name "/watcher/postgre/password" \
+    --value "$DB_PASSWORD" \
+    --type SecureString \
+    --overwrite \
+    --region "$AWS_REGION"
 
 # Check if EKS cluster exists
 echo "🔍 Checking if EKS cluster exists..."
