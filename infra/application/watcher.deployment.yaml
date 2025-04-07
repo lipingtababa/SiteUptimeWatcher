@@ -31,7 +31,7 @@ spec:
       serviceAccountName: watcher-service
       containers:
       - name: watcher
-        image: 954976318202.dkr.ecr.us-east-1.amazonaws.com/watcher:${IMAGE_TAG}
+        image: 954976318202.dkr.ecr.us-east-1.amazonaws.com/watcher
         ports:
         - containerPort: 8000
         env:
