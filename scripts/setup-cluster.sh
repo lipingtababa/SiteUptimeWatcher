@@ -85,16 +85,6 @@ else
     # Wait for ArgoCD to be ready
     echo "⏳ Waiting for ArgoCD to be ready..."
     kubectl wait --for=condition=Available deployment/argocd-server -n argocd --timeout=300s
-
-    # Get ArgoCD admin password and store it in SSM Parameter Store
-    echo "🔑 Storing ArgoCD admin password in SSM Parameter Store..."
-    ARGOCD_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
-    aws ssm put-parameter \
-        --name "/watcher/argocd/admin-password" \
-        --value "$ARGOCD_PASSWORD" \
-        --type SecureString \
-        --overwrite \
-        --region "$AWS_REGION"
 fi
 
 # Patch ArgoCD service to use NodePort
@@ -128,5 +118,4 @@ if [ -n "$ARGOCD_PORT" ]; then
 else
     echo "⚠️ Could not determine ArgoCD UI URL. You may need to check the service status manually."
     echo "Run: kubectl get svc argocd-server -n argocd"
-fi
-echo "🔑 ArgoCD admin password has been stored in SSM Parameter Store at: /watcher/argocd/admin-password" 
+fi 

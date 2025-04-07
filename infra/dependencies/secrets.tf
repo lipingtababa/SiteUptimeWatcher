@@ -23,17 +23,6 @@ resource "aws_ssm_parameter" "postgres_password" {
   }
 }
 
-# SSM Parameter for ArgoCD admin password
-resource "aws_ssm_parameter" "argocd_password" {
-  name  = "/watcher/argocd/admin-password"
-  type  = "SecureString"
-  value = "placeholder" # This will be updated during cluster setup
-  tags = {
-    Environment = "production"
-    Project     = "watcher"
-  }
-}
-
 # IAM policy for reading SSM parameters
 resource "aws_iam_policy" "ssm_reader_policy" {
   name = "ssm_reader_policy"
@@ -47,8 +36,7 @@ resource "aws_iam_policy" "ssm_reader_policy" {
         ]
         Effect = "Allow"
         Resource = [
-          aws_ssm_parameter.postgres_password.arn,
-          aws_ssm_parameter.argocd_password.arn
+          aws_ssm_parameter.postgres_password.arn
         ]
       }
     ]
@@ -67,8 +55,7 @@ resource "aws_iam_policy" "ssm_writer_policy" {
         ]
         Effect = "Allow"
         Resource = [
-          aws_ssm_parameter.postgres_password.arn,
-          aws_ssm_parameter.argocd_password.arn
+          aws_ssm_parameter.postgres_password.arn
         ]
       }
     ]
