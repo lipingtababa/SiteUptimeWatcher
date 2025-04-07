@@ -63,6 +63,7 @@ resource "aws_iam_role_policy_attachment" "watcher_pod_role_pull_image" {
 resource "aws_iam_role_policy" "watcher_pod_policy" {
   name = "watcher-pod-policy"
   role = aws_iam_role.watcher_pod_role.id
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -73,11 +74,8 @@ resource "aws_iam_role_policy" "watcher_pod_policy" {
           "ssm:GetParameters"
         ]
         Resource = [
-          aws_ssm_parameter.db_host.arn,
-          aws_ssm_parameter.db_port.arn,
-          aws_ssm_parameter.db_name.arn,
-          aws_ssm_parameter.db_user.arn,
-          aws_ssm_parameter.db_password.arn
+          "arn:aws:ssm:us-east-1:954976318202:parameter/watcher/db/*",
+          "arn:aws:ssm:us-east-1:954976318202:parameter/watcher/postgre/*"
         ]
       }
     ]

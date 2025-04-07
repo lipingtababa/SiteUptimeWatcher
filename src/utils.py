@@ -82,7 +82,7 @@ def load_secrets_from_secrets_manager():
     db_name = get_ssm_parameter('/watcher/db/name')
     db_user = get_ssm_parameter('/watcher/db/user')
     db_password = get_ssm_parameter('/watcher/db/password', with_decryption=True)
-    
+
     if all([db_host, db_port, db_name, db_user, db_password]):
         os.environ["DB_HOST"] = db_host
         os.environ["DB_PORT"] = db_port
