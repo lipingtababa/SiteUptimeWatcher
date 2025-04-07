@@ -57,28 +57,43 @@ def load_config_from_file(file =".env"):
     if os.getenv("DB_PORT").isdigit() is False:
         raise EnvException("DB_PORT must be an integer")
 
-def load_secrets_from_secrets_manager():
-    """Load secrets from AWS SSM Parameter Store."""
+def get_ssm_parameter(param_name, with_decryption=True):
+    """Get a parameter from AWS SSM Parameter Store."""
     session = boto3.session.Session()
     client = session.client(
-    service_name='ssm',
-    region_name='us-east-1'
+        service_name='ssm',
+        region_name='us-east-1'
     )
     try:
         parameter = client.get_parameter(
-            Name='/watcher/postgre/password',
-            WithDecryption=True
+            Name=param_name,
+            WithDecryption=with_decryption
         )
         return parameter['Parameter']['Value']
     except ClientError as e:
         logger.error(f"Error retrieving parameter: {e}")
         return None
 
+def load_secrets_from_secrets_manager():
+    """Load secrets from AWS SSM Parameter Store."""
+    # Get database connection parameters from SSM
+    db_host = get_ssm_parameter('/watcher/db/host')
+    db_port = get_ssm_parameter('/watcher/db/port')
+    db_name = get_ssm_parameter('/watcher/db/name')
+    db_user = get_ssm_parameter('/watcher/db/user')
+    db_password = get_ssm_parameter('/watcher/db/password', with_decryption=True)
+    
+    if all([db_host, db_port, db_name, db_user, db_password]):
+        os.environ["DB_HOST"] = db_host
+        os.environ["DB_PORT"] = db_port
+        os.environ["DB_NAME"] = db_name
+        os.environ["DB_USER"] = db_user
+        os.environ["DB_PASSWORD"] = db_password
+        return True
+    return False
+
 def load_config():
     """Load configuration from .env or a specified file."""
     load_config_from_file()
-    password = load_secrets_from_secrets_manager()
-    if password:
-        os.environ["DB_PASSWORD"] = password
-    else:
-        raise EnvException("Failed to retrieve database password from SSM Parameter Store")
+    if not load_secrets_from_secrets_manager():
+        raise EnvException("Failed to retrieve database connection parameters from SSM Parameter Store")

@@ -26,6 +26,7 @@ resource "aws_eks_cluster" "idp" {
     endpoint_private_access = true
     endpoint_public_access  = true
   }
+  enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 }
 
 resource "aws_security_group" "cluster_sg" {
@@ -126,3 +127,17 @@ resource "aws_eks_node_group" "arm_node_group" {
   instance_types  = ["t4g.2xlarge"]
   ami_type        = "AL2_ARM_64"
 }
+
+# Output the OIDC provider ARN
+output "oidc_provider_arn" {
+  value = replace(aws_eks_cluster.idp.identity[0].oidc[0].issuer, "https://", "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/")
+}
+
+# Get current AWS account ID
+data "aws_caller_identity" "current" {}
+
+locals {
+  oidc_provider_url = aws_eks_cluster.idp.identity[0].oidc[0].issuer
+  eks_oidc_provider_url = replace(aws_eks_cluster.idp.identity[0].oidc[0].issuer, "https://", "")
+}
+

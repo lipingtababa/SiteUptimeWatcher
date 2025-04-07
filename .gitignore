@@ -1,3 +1,12 @@
 __pycache__/
 /detect/
 .env
+# Local Terraform configuration
+terraform.tfvars
+*.tfvars
+!example.tfvars
+infra/dependencies/terraform.tfvars
+infra/dependencies/terraform.tfstate
+infra/dependencies/terraform.tfstate.backup
+infra/dependencies/tfplan
+infra/dependencies/.terraform/

@@ -24,6 +24,29 @@ resource "aws_iam_role" "github_action_role" {
   })
 }
 
+# IAM policy for writing SSM parameters
+resource "aws_iam_policy" "ssm_writer_policy" {
+  name = "ssm_writer_policy"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ssm:PutParameter"
+        ]
+        Resource = [
+          aws_ssm_parameter.db_host.arn,
+          aws_ssm_parameter.db_port.arn,
+          aws_ssm_parameter.db_name.arn,
+          aws_ssm_parameter.db_user.arn,
+          aws_ssm_parameter.db_password.arn
+        ]
+      }
+    ]
+  })
+}
+
 resource "aws_iam_role_policy_attachment" "github_action_role_write_ssm" {
   role       = aws_iam_role.github_action_role.name
   policy_arn = aws_iam_policy.ssm_writer_policy.arn

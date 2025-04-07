@@ -6,7 +6,7 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: watcher-service
+  name: watcher-sa
   namespace: watcher
   annotations:
     eks.amazonaws.com/role-arn: arn:aws:iam::954976318202:role/watcher-pod-role
@@ -28,7 +28,7 @@ spec:
       labels:
         app: watcher
     spec:
-      serviceAccountName: watcher-service
+      serviceAccountName: watcher-sa
       containers:
       - name: watcher
         image: 954976318202.dkr.ecr.us-east-1.amazonaws.com/watcher:latest

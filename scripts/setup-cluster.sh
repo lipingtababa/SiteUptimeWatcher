@@ -3,21 +3,15 @@
 # Exit on error
 set -e
 
-# Check if database password is provided
-if [ -z "$1" ]; then
-    echo "Error: Database password is required."
-    echo "Usage: $0 <database_password>"
-    exit 1
-fi
-
-# Store database password
-DB_PASSWORD="$1"
-
 # Load environment variables
 export AWS_REGION="us-east-1"
 export AWS_ACCOUNT="954976318202"
 export EKS_CLUSTER="idp"
 export NAMESPACE="watcher"
+
+# Get the absolute path of the script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
 # Function to check if a command exists
 check_command() {
@@ -47,28 +41,30 @@ check_aws_credentials
 echo "🚀 Starting cluster setup..."
 
 # Navigate to dependencies directory
-cd "$(dirname "$0")/../infra/dependencies"
+cd "$PROJECT_ROOT/infra/dependencies"
 
 # Initialize Terraform
 echo "📦 Initializing Terraform..."
 terraform init
 
-# Create Terraform plan
+# Get OIDC provider ID from EKS cluster
+echo "🔍 Getting OIDC provider ID from EKS cluster..."
+OIDC_PROVIDER_ID=$(aws eks describe-cluster --name "$EKS_CLUSTER" --region "$AWS_REGION" --query "cluster.identity.oidc.issuer" --output text | sed 's|https://oidc.eks.us-east-1.amazonaws.com/id/||')
+
+if [ -z "$OIDC_PROVIDER_ID" ]; then
+    echo "❌ Failed to get OIDC provider ID from EKS cluster."
+    exit 1
+fi
+
+echo "✅ Got OIDC provider ID: $OIDC_PROVIDER_ID"
+
+# Create Terraform plan with OIDC provider ID
 echo "📝 Creating Terraform plan..."
 terraform plan -out=tfplan
 
 # Apply Terraform changes
 echo "🔨 Applying Terraform changes..."
 terraform apply -auto-approve tfplan
-
-# Store database password in SSM Parameter Store after infrastructure is ready
-echo "🔑 Storing database password in SSM Parameter Store..."
-aws ssm put-parameter \
-    --name "/watcher/postgre/password" \
-    --value "$DB_PASSWORD" \
-    --type SecureString \
-    --overwrite \
-    --region "$AWS_REGION"
 
 # Check if EKS cluster exists
 echo "🔍 Checking if EKS cluster exists..."
@@ -106,6 +102,18 @@ else
     kubectl wait --for=condition=Available deployment/argocd-server -n argocd --timeout=300s
 fi
 
+# Get ArgoCD admin password
+echo "🔑 Retrieving ArgoCD admin password..."
+ARGOCD_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
+if [ -n "$ARGOCD_PASSWORD" ]; then
+    echo "✅ ArgoCD admin credentials:"
+    echo "   Username: admin"
+    echo "   Password: $ARGOCD_PASSWORD"
+else
+    echo "⚠️ Could not retrieve ArgoCD admin password. You may need to reset it."
+    echo "   Run: kubectl -n argocd patch secret argocd-initial-admin-secret -p '{\"data\":{\"password\":\"'$(openssl rand -base64 24)'\"}}'"
+fi
+
 # Patch ArgoCD service to use NodePort
 echo "🔧 Patching ArgoCD service to use NodePort..."
 kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}'
@@ -122,7 +130,7 @@ fi
 
 # Deploy the watcher application
 echo "📦 Deploying watcher application..."
-cd "$(dirname "$0")/.."
+cd "$PROJECT_ROOT"
 if [ -f "infra/argocd/watcher.yaml" ]; then
     kubectl apply -f infra/argocd/watcher.yaml
     echo "✅ Watcher application deployed successfully!"
@@ -132,8 +140,19 @@ else
 fi
 
 echo "✅ Cluster setup completed successfully!"
+
+# Set up port forwarding for ArgoCD UI
 if [ -n "$ARGOCD_PORT" ]; then
+    echo "🌐 Setting up port forwarding for ArgoCD UI..."
+    echo "🔒 Port forwarding will run in the background. Press Ctrl+C to stop it when you're done."
     echo "🌐 ArgoCD UI will be available at: https://localhost:$ARGOCD_PORT"
+    
+    # Start port forwarding in the background
+    kubectl port-forward -n argocd svc/argocd-server $ARGOCD_PORT:443 &
+    PF_PID=$!
+    
+    echo "⏳ Port forwarding started with PID: $PF_PID"
+    echo "🔒 To stop port forwarding, run: kill $PF_PID"
 else
     echo "⚠️ Could not determine ArgoCD UI URL. You may need to check the service status manually."
     echo "Run: kubectl get svc argocd-server -n argocd"
