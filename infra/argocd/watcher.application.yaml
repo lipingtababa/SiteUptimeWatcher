@@ -9,9 +9,6 @@ spec:
     repoURL: https://github.com/lipingtababa/SiteUptimeWatcher.git
     targetRevision: HEAD
     path: infra/application
-    kustomize:
-      images:
-      - 954976318202.dkr.ecr.us-east-1.amazonaws.com/watcher:latest
   destination:
     server: https://kubernetes.default.svc
     namespace: watcher
@@ -19,3 +16,5 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+    - CreateNamespace=true

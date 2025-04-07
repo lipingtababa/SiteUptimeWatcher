@@ -97,7 +97,48 @@ else
         --region "$AWS_REGION"
 fi
 
+# Patch ArgoCD service to use LoadBalancer
+echo "🔧 Patching ArgoCD service to use LoadBalancer..."
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+
+# Wait for the LoadBalancer to be provisioned
+echo "⏳ Waiting for ArgoCD LoadBalancer to be provisioned..."
+echo "This may take a few minutes..."
+for i in {1..30}; do
+    if kubectl get svc argocd-server -n argocd -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null | grep -q "amazonaws.com"; then
+        echo "✅ LoadBalancer provisioned successfully!"
+        break
+    fi
+    echo "Waiting for LoadBalancer to be provisioned... ($i/30)"
+    sleep 10
+done
+
+# Get the LoadBalancer URL
+echo "🔍 Getting ArgoCD LoadBalancer URL..."
+ARGOCD_URL=$(kubectl get svc argocd-server -n argocd -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+if [ -z "$ARGOCD_URL" ]; then
+    echo "⚠️ Could not get LoadBalancer URL. You may need to check the service status manually."
+    echo "Run: kubectl get svc argocd-server -n argocd"
+else
+    echo "🌐 ArgoCD UI will be available at: https://$ARGOCD_URL"
+fi
+
+# Deploy the watcher application
+echo "📦 Deploying watcher application..."
+cd "$(dirname "$0")/.."
+if [ -f "infra/argocd/watcher.yaml" ]; then
+    kubectl apply -f infra/argocd/watcher.yaml
+    echo "✅ Watcher application deployed successfully!"
+else
+    echo "⚠️ Watcher application manifest not found at infra/argocd/watcher.yaml"
+    echo "Please create the manifest and apply it manually."
+fi
+
 echo "✅ Cluster setup completed successfully!"
-echo "🌐 ArgoCD UI will be available at: https://localhost:8080"
-echo "   (Run 'kubectl port-forward svc/argocd-server -n argocd 8080:443' to access it)"
+if [ -n "$ARGOCD_URL" ]; then
+    echo "🌐 ArgoCD UI will be available at: https://$ARGOCD_URL"
+else
+    echo "⚠️ Could not determine ArgoCD UI URL. You may need to check the service status manually."
+    echo "Run: kubectl get svc argocd-server -n argocd"
+fi
 echo "🔑 ArgoCD admin password has been stored in SSM Parameter Store at: /watcher/argocd/admin-password" 
