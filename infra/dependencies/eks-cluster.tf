@@ -23,6 +23,8 @@ resource "aws_eks_cluster" "idp" {
   vpc_config {
     subnet_ids = data.aws_subnets.default.ids
     security_group_ids = [aws_security_group.cluster_sg.id]
+    endpoint_private_access = true
+    endpoint_public_access  = true
   }
 }
 
@@ -33,21 +35,7 @@ resource "aws_security_group" "cluster_sg" {
   ingress {
     from_port   = 0
     to_port     = 0
-    protocol    = "-1" 
-    self        = true
-  }
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 31436
-    to_port     = 31436
-    protocol    = "tcp"
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -101,42 +89,40 @@ resource "aws_iam_role_policy_attachment" "idp_node_role_attach_node" {
 resource "aws_eks_addon" "eks_addon_cni" {
   cluster_name      = aws_eks_cluster.idp.name
   addon_name        = "vpc-cni"
-  addon_version     = "v1.16.0-eksbuild.1"
+  addon_version     = "v1.19.3-eksbuild.1"
+}
+
+resource "aws_eks_addon" "eks_addon_kube_proxy" {
+  cluster_name      = aws_eks_cluster.idp.name
+  addon_name        = "kube-proxy"
+  addon_version     = "v1.32.0-eksbuild.2"
+  depends_on        = [aws_eks_addon.eks_addon_cni]
+}
+
+resource "aws_eks_addon" "eks_addon_coredns" {
+  cluster_name      = aws_eks_cluster.idp.name
+  addon_name        = "coredns"
+  addon_version     = "v1.11.4-eksbuild.2"
+  depends_on        = [aws_eks_addon.eks_addon_kube_proxy]
 }
 
 resource "aws_eks_addon" "eks-addon-eks-pod-identity-agent" {
   cluster_name      = aws_eks_cluster.idp.name
   addon_name        = "eks-pod-identity-agent"
   addon_version     = "v1.0.0-eksbuild.1"
+  depends_on        = [aws_eks_addon.eks_addon_coredns]
 }
 
-resource "aws_eks_addon" "eks_addon_proxy" {
-  cluster_name      = aws_eks_cluster.idp.name
-  addon_name        = "kube-proxy"
-  addon_version     = "v1.28.4-eksbuild.4"
-}
-
-resource "aws_eks_addon" "eks_Xaddon_coredns" {
-  cluster_name      = aws_eks_cluster.idp.name
-  addon_name        = "coredns"
-  addon_version     = "v1.10.1-eksbuild.6"
-}
-
-resource "aws_eks_node_group" "idp_node_group" {
+resource "aws_eks_node_group" "arm_node_group" {
   cluster_name    = aws_eks_cluster.idp.name
-  node_group_name = "idp_node_group"
+  node_group_name = "arm_node_group"
   node_role_arn   = aws_iam_role.idp_node_role.arn
   subnet_ids      = data.aws_subnets.default.ids
   scaling_config {
-    desired_size = 1
-    max_size     = 2
+    desired_size = 2
+    max_size     = 3
     min_size     = 0
   }
   instance_types  = ["t4g.2xlarge"]
   ami_type        = "AL2_ARM_64"
-  remote_access {
-    ec2_ssh_key = "machi"
-    source_security_group_ids = [aws_security_group.cluster_sg.id]
-  }
-  depends_on = [aws_eks_addon.eks_addon_cni, aws_eks_addon.eks_addon_proxy]
 }
