@@ -3,6 +3,9 @@ kind: Job
 metadata:
   name: db-init
   namespace: watcher
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-options: Prune=true
 spec:
   template:
     spec:
