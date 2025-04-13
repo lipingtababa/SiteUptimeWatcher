@@ -43,3 +43,27 @@ spec:
           value: idp
         - name: NAMESPACE
           value: watcher
+        - name: DATAKIT_HOST
+          value: "localhost"
+        - name: DATAKIT_PORT
+          value: "9529"
+      - name: datakit
+        image: guance/datakit:latest
+        ports:
+        - containerPort: 9529
+        env:
+        - name: DATAKIT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: datakit-secret
+              key: token
+        - name: DATAKIT_GLOBAL_TAGS
+          value: "project=site-uptime-watcher,env=prod"
+        - name: DATAKIT_ENABLE_INPUTS
+          value: "prom"
+        - name: DATAKIT_PROM_URLS
+          value: "http://localhost:9529/metrics"
+        - name: DATAKIT_PROM_INTERVAL
+          value: "10s"
+        - name: DATAKIT_HTTP_API_LISTEN
+          value: "0.0.0.0:9529"

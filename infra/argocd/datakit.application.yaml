@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: datakit
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://helm.guance.com
+    chart: datakit
+    targetRevision: 1.0.0
+    helm:
+      valueFiles:
+        - infra/application/datakit/values.yaml
+      parameters:
+        - name: global.dataway.token
+          value: YOUR_DATAKIT_TOKEN_HERE
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: watcher
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true 
