@@ -12,7 +12,7 @@ resource "aws_iam_role" "datakit_role" {
         }
         Condition = {
           StringEquals = {
-            "${aws_iam_openid_connect_provider.this.url}:sub" = "system:serviceaccount:watcher:datakit-sa"
+            "${aws_iam_openid_connect_provider.this.url}:sub" = "system:serviceaccount:watcher:watcher-sa"
           }
         }
       }

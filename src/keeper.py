@@ -2,10 +2,13 @@
 1. Ensure DB is ready
 2. Fetch sites from DB
 3. Insert stats into DB
+4. Send metrics to Datakit
 """
 import os
 from datetime import datetime, timezone
 import re
+import json
+import requests
 
 from asyncio import Queue
 import asyncio
@@ -20,6 +23,12 @@ from endpoint import Endpoint
 ENDPOINTS_TABLE_NAME = 'endpoints'
 METRICS_TABLE_NAME = 'metrics'
 PG_BATCH_SIZE = 1000
+
+# Datakit configuration
+DATAKIT_ENABLED = True
+datakit_host = os.getenv("DATAKIT_HOST", "localhost")
+datakit_port = int(os.getenv("DATAKIT_PORT", "9529"))
+datakit_url = f"http://{datakit_host}:{datakit_port}"
 
 class Keeper:
     """
@@ -55,6 +64,9 @@ class Keeper:
                         metrics.append(metric)
                         self.metrics_buffer.task_done()
                     self.insert_metrics(metrics)
+                    # Send metrics to Datakit if enabled
+                    if DATAKIT_ENABLED:
+                        self._send_metrics_to_datakit(metrics)
             except Exception as e:
                 logger.error(e)
             finally:
@@ -203,6 +215,39 @@ class Keeper:
             conn.rollback()
         finally:
             self.release_connection(conn)
+
+    def _send_metrics_to_datakit(self, metrics: [Stat]):
+        """Send metrics to Datakit using HTTP API."""
+        try:
+            # Prepare metrics data for all metrics in the batch
+            metrics_data = []
+            for metric in metrics:
+                # Create tags for the metrics
+                tags = {
+                    "endpoint": metric.endpoint.url,
+                    "status_code": str(metric.status_code),
+                    "regex_match": str(metric.regex_match).lower()
+                }
+                
+                # Add metrics data
+                metrics_data.append({
+                    "measurement": "site_uptime_watcher",
+                    "tags": tags,
+                    "fields": {
+                        "response_time": metric.duration,
+                        "status_code": metric.status_code,
+                        "regex_match": 1 if metric.regex_match else 0
+                    }
+                })
+            
+            # Send metrics via HTTP API
+            metrics_url = f"{datakit_url}/v1/write/metrics"
+            response = requests.post(metrics_url, json=metrics_data)
+            if response.status_code != 200:
+                logger.error(f"Error sending metrics to Datakit: {response.status_code} - {response.text}")
+            
+        except Exception as e:
+            logger.error(f"Error sending metrics to Datakit: {e}")
 
     def __del__(self):
         self.connection_pool.closeall()

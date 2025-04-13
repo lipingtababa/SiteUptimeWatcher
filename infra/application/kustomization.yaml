@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - watcher.deployment.yaml
+  - datakit.yaml
   - datakit-secret.yaml
 
 commonLabels:
