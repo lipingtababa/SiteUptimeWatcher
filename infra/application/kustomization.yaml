@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - watcher.deployment.yaml
+  - db-init-job.yaml
 
 commonLabels:
   app.kubernetes.io/part-of: site-uptime-watcher

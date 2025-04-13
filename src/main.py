@@ -23,13 +23,12 @@ async def main():
                 partition_count)
     signal.signal(signal.SIGINT, handle_signals)
 
-    load_config()
-    # Read endpoints which are assigned to this process from DB
-    keeper = Keeper(None)
-    # Ensure database tables are created before fetching endpoints
-    keeper.check_readiness()
-    endpoints = keeper.fetch_endpoints(partition_count, partition_id)
-    logger.info("Process [%d] monitors %d endpoints", os.getpid(), len(endpoints))
+    config = load_config()
+    keeper = Keeper(config)
+    endpoints = keeper.fetch_endpoints()
+    if not endpoints:
+        logger.warning("No endpoints found in database")
+        return
 
     worker = Worker()
     await worker.run(endpoints)
