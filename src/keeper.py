@@ -7,14 +7,13 @@
 import os
 from datetime import datetime, timezone
 import re
-import json
-import requests
 
 from asyncio import Queue
 import asyncio
 import psycopg2
 import psycopg2.extras
 import psycopg2.pool
+import requests
 
 from utils import logger, KEEPER_SLEEP_INTERVAL, RUNNING_STATUS
 from metrics import Stat
@@ -228,7 +227,6 @@ class Keeper:
                     "status_code": str(metric.status_code),
                     "regex_match": str(metric.regex_match).lower()
                 }
-                
                 # Add metrics data
                 metrics_data.append({
                     "measurement": "site_uptime_watcher",
@@ -239,13 +237,11 @@ class Keeper:
                         "regex_match": 1 if metric.regex_match else 0
                     }
                 })
-            
             # Send metrics via HTTP API
             metrics_url = f"{datakit_url}/v1/write/metrics"
-            response = requests.post(metrics_url, json=metrics_data)
+            response = requests.post(metrics_url, json=metrics_data, timeout=5)
             if response.status_code != 200:
                 logger.error(f"Error sending metrics to Datakit: {response.status_code} - {response.text}")
-            
         except Exception as e:
             logger.error(f"Error sending metrics to Datakit: {e}")
 
