@@ -26,6 +26,8 @@ async def main():
     load_config()
     # Read endpoints which are assigned to this process from DB
     keeper = Keeper(None)
+    # Ensure database tables are created before fetching endpoints
+    keeper.check_readiness()
     endpoints = keeper.fetch_endpoints(partition_count, partition_id)
     logger.info("Process [%d] monitors %d endpoints", os.getpid(), len(endpoints))
 
