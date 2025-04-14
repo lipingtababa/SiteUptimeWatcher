@@ -23,14 +23,15 @@ async def main():
                 partition_count)
     signal.signal(signal.SIGINT, handle_signals)
 
-    config = load_config()
-    keeper = Keeper(config)
-    endpoints = keeper.fetch_endpoints()
+    load_config()
+    metrics_buffer = asyncio.Queue()
+    keeper = Keeper(metrics_buffer)
+    endpoints = keeper.fetch_endpoints(partition_count, partition_id)
     if not endpoints:
         logger.warning("No endpoints found in database")
         return
 
-    worker = Worker()
+    worker = Worker(metrics_buffer)
     await worker.run(endpoints)
 
 def read_partition_count_and_id():

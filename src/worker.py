@@ -17,9 +17,9 @@ class Worker:
     """
     This class sends HTTP requests and collect metrics for a URL.
     """
-    def __init__(self):
+    def __init__(self, stats_buffer=None):
         # This buffer is used between workers and keepers
-        self.statsBuffer = asyncio.Queue()
+        self.statsBuffer = stats_buffer if stats_buffer is not None else asyncio.Queue()
 
     async def run(self, endpoints: [Endpoint]):
         """Provision tasks."""

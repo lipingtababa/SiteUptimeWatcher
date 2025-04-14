@@ -12,7 +12,7 @@ spec:
       serviceAccountName: watcher-sa
       containers:
       - name: db-init
-        image: ${ECR_REGISTRY}/siteuptimewatcher:latest
+        image: 954976318202.dkr.ecr.us-east-1.amazonaws.com/watcher:latest
         command: ["python3", "-c", "from utils import load_config; from keeper import Keeper; from asyncio import Queue; load_config(); Keeper(Queue()).check_readiness()"]
       restartPolicy: OnFailure
   backoffLimit: 4 
