@@ -1,0 +1,29 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: datakit
+  namespace: watcher
+spec:
+  interval: 1h
+  url: https://pubrepo.guance.com/chartrepo/datakit
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: datakit
+  namespace: watcher
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: datakit
+      version: ">=1.0.0"
+      sourceRef:
+        kind: HelmRepository
+        name: datakit
+        namespace: watcher
+      interval: 1h
+  valuesFrom:
+  - kind: ConfigMap
+    name: datakit-values
+    valuesKey: values.yaml 

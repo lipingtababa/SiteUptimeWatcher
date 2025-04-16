@@ -4,7 +4,8 @@ kind: Kustomization
 resources:
   - watcher.deployment.yaml
   - db-init-job.yaml
-  - datakit-daemonset.yaml
+  - datakit-helmrelease.yaml
+  - datakit-values-configmap.yaml
   - datakit-token-sealed.yaml
 
 commonLabels:
