@@ -1,0 +1,13 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: datakit-token
+  namespace: watcher
+spec:
+  encryptedData:
+    token: AgA0hCrLztaOmwFmil9xfj5i+gDpGj6VOPI9ampUrYDul8f8nKHzBa8Mj3yIclbYJAD4G/i/vKq3Mx+iKBfayse6nQ7jEJAeXs6bhNcKS8/3oQ3BTeqEw3clG6uBY3dWJ3s47KZB7JkCPiA5Xnj0RIUM3HHNbgvplKKnoEzhL9GLqtBbIe7CM7nTV1+jBx9nIHJ9moPe5hT52mzNmTvOseqF5ElgQbFBfawLdWIaSYrplgGEw23bUWcmI7aobWi/tjJPaLe4RP2BC5Rwcf9GO3dvLyAkNRL6ANUnFgSg2gUupTcrYW3Mc+U6rz5OGJ2dWwxEOaDL5S3zKoc9gHK/FkeSgt/HwS9PLhw/9hnFdrFQytuJ6YnhM90NYGJ03hNUMCdA4y6nKr6M8S5Iu9paQGQg7c0JCeFkHj/46jpjmYGNd2bqXETD/70r/GY6BBIjYkIIbObU/FL9WEd0qjBJZzWYTKChuH+IaNNpixmTI0Fa/nwXxB5NIFo82pZVpCR0wXpn3ti0NYHf0TPqJV1d92xefOtHXB7Nnj0f31bShMGvJ21akiUBMNW5yVnTP7BO7fHd+xmiDEnCYPNV+0UOUP8Agj20ShSRtNl4MsoYDhGZN3RLuxf02QKNl6hA/LD4Fev5suQ07gil6WfCMOkvdDaeCBlXTqykn2Kt2FKb2efX5tfKUkAEYYJDWnbqm5WzB0Vs4LyqgfONe6nzc6a5Psv4jYunFBuH9xVYZnZfSSAa2dIpto4=
+  template:
+    metadata:
+      name: datakit-token
+      namespace: watcher
+    type: Opaque

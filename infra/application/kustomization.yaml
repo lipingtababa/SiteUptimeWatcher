@@ -4,7 +4,41 @@ kind: Kustomization
 resources:
   - watcher.deployment.yaml
   - db-init-job.yaml
+  - datakit-daemonset.yaml
+  - datakit-token-sealed.yaml
 
 commonLabels:
   app.kubernetes.io/part-of: site-uptime-watcher
-  app.kubernetes.io/managed-by: argocd 
+  app.kubernetes.io/managed-by: argocd
+
+vars:
+- name: AWS_ACCOUNT_ID
+  objRef:
+    kind: ConfigMap
+    name: aws-config
+    apiVersion: v1
+  fieldRef:
+    fieldPath: data.accountId
+- name: AWS_REGION
+  objRef:
+    kind: ConfigMap
+    name: aws-config
+    apiVersion: v1
+  fieldRef:
+    fieldPath: data.region
+- name: EKS_CLUSTER
+  objRef:
+    kind: ConfigMap
+    name: cluster-config
+    apiVersion: v1
+  fieldRef:
+    fieldPath: data.clusterName
+
+configMapGenerator:
+- name: aws-config
+  literals:
+  - accountId=954976318202
+  - region=us-east-1
+- name: cluster-config
+  literals:
+  - clusterName=idp

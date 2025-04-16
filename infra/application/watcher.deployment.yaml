@@ -9,7 +9,7 @@ metadata:
   name: watcher-sa
   namespace: watcher
   annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::954976318202:role/watcher-pod-role
+    eks.amazonaws.com/role-arn: arn:aws:iam::$(AWS_ACCOUNT_ID):role/watcher-pod-role
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -32,39 +32,22 @@ spec:
       serviceAccountName: watcher-sa
       containers:
       - name: watcher
-        image: 954976318202.dkr.ecr.us-east-1.amazonaws.com/watcher:latest
+        image: $(AWS_ACCOUNT_ID).dkr.ecr.us-east-1.amazonaws.com/watcher:latest
         ports:
         - containerPort: 8000
         env:
         - name: AWS_REGION
-          value: us-east-1
+          value: $(AWS_REGION)
         - name: AWS_ACCOUNT
-          value: "954976318202"
+          value: $(AWS_ACCOUNT_ID)
         - name: EKS_CLUSTER
-          value: idp
+          value: $(EKS_CLUSTER)
         - name: NAMESPACE
           value: watcher
-        - name: DATAKIT_HOST
-          value: "localhost"
-        - name: DATAKIT_PORT
-          value: "9529"
-      - name: datakit
-        image: guance/datakit:latest
-        ports:
-        - containerPort: 9529
-        env:
-        - name: DATAKIT_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: datakit-secret
-              key: token
-        - name: DATAKIT_GLOBAL_TAGS
-          value: "project=site-uptime-watcher,env=prod"
-        - name: DATAKIT_ENABLE_INPUTS
-          value: "prom"
-        - name: DATAKIT_PROM_URLS
-          value: "http://localhost:9529/metrics"
-        - name: DATAKIT_PROM_INTERVAL
-          value: "10s"
-        - name: DATAKIT_HTTP_API_LISTEN
-          value: "0.0.0.0:9529"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"

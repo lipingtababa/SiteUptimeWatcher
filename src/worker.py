@@ -6,6 +6,7 @@
 import time
 import asyncio
 import aiohttp
+from typing import List
 
 from utils import logger, WORKER_KEEPER_RATIO
 from endpoint import Endpoint
@@ -21,7 +22,7 @@ class Worker:
         # This buffer is used between workers and keepers
         self.statsBuffer = stats_buffer if stats_buffer is not None else asyncio.Queue()
 
-    async def run(self, endpoints: [Endpoint]):
+    async def run(self, endpoints: List[Endpoint]):
         """Provision tasks."""
         tasks = []
         # For each endpoint, generate a task which sends HTTP requests to it
