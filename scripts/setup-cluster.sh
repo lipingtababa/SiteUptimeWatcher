@@ -5,7 +5,7 @@ set -e
 
 # Load environment variables
 export AWS_REGION="us-east-1"
-export AWS_ACCOUNT="954976318202"
+export AWS_ACCOUNT="975688691016"
 export EKS_CLUSTER="idp"
 export NAMESPACE="watcher"
 

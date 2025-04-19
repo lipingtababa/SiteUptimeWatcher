@@ -8,8 +8,8 @@ on:
 
 env:
   AWS_REGION: us-east-1
+  AWS_ACCOUNT: 975688691016
   ECR_REPOSITORY: watcher
-  AWS_ACCOUNT: 954976318202
   IMAGE_TAG: ${{ github.sha }}
   EKS_CLUSTER: idp
   NAMESPACE: watcher
@@ -58,7 +58,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        platforms: linux/arm64
+        platforms: linux/amd64
         push: true
         tags: |
           ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}

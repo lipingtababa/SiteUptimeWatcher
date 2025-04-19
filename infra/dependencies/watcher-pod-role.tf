@@ -4,14 +4,14 @@ resource "aws_iam_role" "watcher_pod_role" {
     Version = "2012-10-17"
     Statement = [
       {
+        Action = "sts:AssumeRoleWithWebIdentity"
         Effect = "Allow"
         Principal = {
-          Federated = "arn:aws:iam::954976318202:oidc-provider/${local.eks_oidc_provider_url}"
+          Federated = "arn:aws:iam::975688691016:oidc-provider/${local.eks_oidc_provider_url}"
         }
-        Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringEquals = {
-            "${local.eks_oidc_provider_url}:sub": "system:serviceaccount:watcher:watcher-sa"
+            "${local.eks_oidc_provider_url}:sub": "system:serviceaccount:watcher:watcher-sa",
             "${local.eks_oidc_provider_url}:aud": "sts.amazonaws.com"
           }
         }
@@ -74,8 +74,8 @@ resource "aws_iam_role_policy" "watcher_pod_policy" {
           "ssm:GetParameters"
         ]
         Resource = [
-          "arn:aws:ssm:us-east-1:954976318202:parameter/watcher/db/*",
-          "arn:aws:ssm:us-east-1:954976318202:parameter/watcher/postgre/*"
+          "arn:aws:ssm:us-east-1:975688691016:parameter/watcher/db/*",
+          "arn:aws:ssm:us-east-1:975688691016:parameter/watcher/postgre/*"
         ]
       }
     ]

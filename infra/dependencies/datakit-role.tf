@@ -35,7 +35,7 @@ resource "aws_iam_role_policy" "datakit_policy" {
           "ssm:GetParametersByPath"
         ]
         Resource = [
-          "arn:aws:ssm:us-east-1:954976318202:parameter/watcher/*"
+          "arn:aws:ssm:us-east-1:975688691016:parameter/watcher/*"
         ]
       }
     ]

@@ -7,10 +7,6 @@ data:
   values.yaml: |
     datakit:
       dataway_url: "https://eu1-openway.truewatch.com?token=$(DATAKIT_TOKEN)"
-      image:
-        repository: guance/datakit
-        tag: latest
-        pullPolicy: Always
       resources:
         requests:
           memory: "256Mi"

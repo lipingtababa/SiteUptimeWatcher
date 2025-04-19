@@ -38,7 +38,7 @@ vars:
 configMapGenerator:
 - name: aws-config
   literals:
-  - accountId=954976318202
+  - accountId=975688691016
   - region=us-east-1
 - name: cluster-config
   literals:

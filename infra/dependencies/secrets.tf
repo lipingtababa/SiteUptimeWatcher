@@ -9,5 +9,5 @@ variable "aws_region" {
 
 variable "aws_account" {
   type    = string
-  default = "954976318202"
+  default = "975688691016"
 }

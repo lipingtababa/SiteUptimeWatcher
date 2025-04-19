@@ -120,12 +120,12 @@ resource "aws_eks_node_group" "arm_node_group" {
   node_role_arn   = aws_iam_role.idp_node_role.arn
   subnet_ids      = data.aws_subnets.default.ids
   scaling_config {
-    desired_size = 2
-    max_size     = 3
+    desired_size = 4
+    max_size     = 6
     min_size     = 0
   }
-  instance_types  = ["t4g.2xlarge"]
-  ami_type        = "AL2_ARM_64"
+  instance_types  = ["t3.micro"]
+  ami_type        = "AL2_x86_64"
 }
 
 # Output the OIDC provider ARN
