@@ -64,7 +64,7 @@ if [ -n "$ARGOCD_PORT" ]; then
     echo "🌐 ArgoCD UI will be available at: https://localhost:$ARGOCD_PORT"
     
     # Start port forwarding in the background
-    kubectl port-forward -n argocd svc/argocd-server $ARGOCD_PORT:443 &
+    nohup kubectl port-forward -n argocd svc/argocd-server $ARGOCD_PORT:443 &
     PF_PID=$!
     
     echo "⏳ Port forwarding started with PID: $PF_PID"

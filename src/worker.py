@@ -3,10 +3,10 @@
     Worker also provisions keepers.
 """
 
-import time
 import asyncio
-import aiohttp
+import time
 from typing import List
+import aiohttp
 
 from utils import logger, WORKER_KEEPER_RATIO
 from endpoint import Endpoint
