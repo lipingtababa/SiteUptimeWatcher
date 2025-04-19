@@ -98,3 +98,10 @@ resource "aws_iam_role_policy_attachment" "github_action_role_eks_deploy" {
   role       = aws_iam_role.github_action_role.name
   policy_arn = aws_iam_policy.github_action_eks_deploy_policy.arn
 }
+
+
+resource "aws_iam_openid_connect_provider" "oidc_github" {
+  url             = local.https://token.actions.githubusercontent.com
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
+}

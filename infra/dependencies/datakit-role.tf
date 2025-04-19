@@ -8,11 +8,11 @@ resource "aws_iam_role" "datakit_role" {
         Action = "sts:AssumeRoleWithWebIdentity"
         Effect = "Allow"
         Principal = {
-          Federated = aws_iam_openid_connect_provider.this.arn
+          Federated = aws_iam_openid_connect_provider.oidc_idp.arn
         }
         Condition = {
           StringEquals = {
-            "${aws_iam_openid_connect_provider.this.url}:sub" = "system:serviceaccount:watcher:watcher-sa"
+            "${aws_iam_openid_connect_provider.oidc_idp.url}:sub" = "system:serviceaccount:watcher:watcher-sa"
           }
         }
       }

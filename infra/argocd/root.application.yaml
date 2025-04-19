@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: root
-  namespace: argocd
+  namespace: watcher
 spec:
   project: default
   source:
@@ -11,10 +11,10 @@ spec:
     path: infra/argocd
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: watcher
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
-    - CreateNamespace=true 
+    - CreateNamespace=true
