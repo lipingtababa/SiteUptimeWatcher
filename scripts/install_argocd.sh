@@ -73,3 +73,13 @@ else
     echo "⚠️ Could not determine ArgoCD UI URL. You may need to check the service status manually."
     echo "Run: kubectl get svc argocd-server -n argocd"
 fi
+
+# Apply root application
+echo -e "Applying root application..."
+kubectl apply -f ../infra/argocd/root.application.yaml
+
+# Wait for root application to be ready
+echo -e "Waiting for root application to be ready..."
+kubectl wait --for=condition=ready pod -l app.kubernetes.io=argocd-application-controller -n argocd --timeout=60s
+
+

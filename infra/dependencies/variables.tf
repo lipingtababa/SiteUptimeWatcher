@@ -5,5 +5,10 @@ variable "aiven_api_token" {
 
 variable "aiven_project" {
   type        = string
-  description = "Aiven project name"
-} 
+  description = "IDP"
+}
+
+variable "stage" {
+  type    = string
+  default = "dev"
+}
