@@ -85,5 +85,4 @@ resource "aws_iam_role_policy" "watcher_pod_policy" {
 resource "aws_iam_openid_connect_provider" "oidc_idp" {
   url             = local.oidc_provider_url
   client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = ["087E8ED1E7951F9ED0E098541DE06F0DA698D309"]
 }

@@ -101,7 +101,8 @@ resource "aws_iam_role_policy_attachment" "github_action_role_eks_deploy" {
 
 
 resource "aws_iam_openid_connect_provider" "oidc_github" {
-  url             = local.https://token.actions.githubusercontent.com
+  url             = "https://token.actions.githubusercontent.com"
   client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
 }
+

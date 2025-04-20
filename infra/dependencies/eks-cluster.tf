@@ -120,8 +120,8 @@ resource "aws_eks_node_group" "arm_node_group" {
   node_role_arn   = aws_iam_role.idp_node_role.arn
   subnet_ids      = data.aws_subnets.default.ids
   scaling_config {
-    desired_size = 4
-    max_size     = 6
+    desired_size = 8
+    max_size     = 8
     min_size     = 0
   }
   instance_types  = ["t3.micro"]
@@ -140,4 +140,6 @@ locals {
   oidc_provider_url = aws_eks_cluster.idp.identity[0].oidc[0].issuer
   eks_oidc_provider_url = replace(aws_eks_cluster.idp.identity[0].oidc[0].issuer, "https://", "")
 }
+
+
 
