@@ -8,6 +8,13 @@ export AWS_REGION="us-east-1"
 export EKS_CLUSTER="idp"
 export NAMESPACE="watcher"
 
+# take a parameter for stage
+export STAGE=$1
+# default should be dev
+if [ -z "$STAGE" ]; then
+    export STAGE="dev"
+fi
+
 # Get the absolute path of the script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
@@ -49,11 +56,11 @@ terraform init
 
 # Create Terraform plan with OIDC provider ID
 echo "📝 Creating Terraform plan..."
-terraform plan -out=tfplan
+terraform plan -out=tfplan -var="stage=$STAGE"
 
 # Apply Terraform changes
 echo "🔨 Applying Terraform changes..."
-terraform apply -auto-approve tfplan
+terraform apply -auto-approve tfplan -var="stage=$STAGE"
 
 # Check if EKS cluster exists
 echo "🔍 Checking if EKS cluster exists..."
