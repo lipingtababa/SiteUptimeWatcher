@@ -1,20 +1,22 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: sealed-secrets
+  name: datakit
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   project: default
   source:
-    repoURL: https://github.com/bitnami-labs/sealed-secrets
+    repoURL: https://github.com/lipingtababa/SiteUptimeWatcher.git
     targetRevision: HEAD
-    path: helm/sealed-secrets
+    path: infra/application/datakit
   destination:
     server: https://kubernetes.default.svc
-    namespace: kube-system
+    namespace: watcher
   syncPolicy:
     automated:
       prune: true
-      selfHeal: true 
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true 
