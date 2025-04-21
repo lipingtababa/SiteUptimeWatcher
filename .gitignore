@@ -10,3 +10,4 @@ infra/dependencies/terraform.tfstate
 infra/dependencies/terraform.tfstate.backup
 infra/dependencies/tfplan
 infra/dependencies/.terraform/
+scripts/nohup.out

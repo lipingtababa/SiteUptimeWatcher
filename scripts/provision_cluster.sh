@@ -60,7 +60,7 @@ terraform plan -out=tfplan -var="stage=$STAGE"
 
 # Apply Terraform changes
 echo "🔨 Applying Terraform changes..."
-terraform apply -auto-approve tfplan -var="stage=$STAGE"
+terraform apply -auto-approve tfplan
 
 # Check if EKS cluster exists
 echo "🔍 Checking if EKS cluster exists..."
