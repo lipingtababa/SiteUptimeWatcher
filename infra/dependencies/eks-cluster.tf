@@ -114,17 +114,18 @@ resource "aws_eks_addon" "eks-addon-eks-pod-identity-agent" {
   depends_on        = [aws_eks_addon.eks_addon_coredns]
 }
 
-resource "aws_eks_node_group" "arm_node_group" {
+
+resource "aws_eks_node_group" "big_node_group" {
   cluster_name    = aws_eks_cluster.idp.name
-  node_group_name = "arm_node_group"
+  node_group_name = "big_node_group"
   node_role_arn   = aws_iam_role.idp_node_role.arn
   subnet_ids      = data.aws_subnets.default.ids
   scaling_config {
-    desired_size = 8
-    max_size     = 8
+    desired_size = 2
+    max_size     = 2
     min_size     = 0
   }
-  instance_types  = ["t3.micro"]
+  instance_types  = ["t3.2xlarge"]
   ami_type        = "AL2_x86_64"
 }
 
