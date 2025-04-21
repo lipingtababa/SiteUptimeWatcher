@@ -17,11 +17,11 @@ echo -e "${GREEN}Deploying applications...${NC}"
 
 # Apply DataKit resources
 echo -e "${YELLOW}Applying DataKit resources...${NC}"
-kubectl apply -k infra/application/datakit
+kubectl apply -k ../infra/application/datakit
 
 # Apply watcher application resources
 echo -e "${YELLOW}Applying watcher application resources...${NC}"
-kubectl apply -k infra/application
+kubectl apply -k ../infra/application
 
 # Wait for resources to be ready
 echo -e "${YELLOW}Waiting for resources to be ready...${NC}"
