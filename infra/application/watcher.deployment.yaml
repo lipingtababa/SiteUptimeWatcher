@@ -16,9 +16,6 @@ kind: Deployment
 metadata:
   name: watcher
   namespace: watcher
-  annotations:
-    argocd.argoproj.io/sync-options: Prune=true
-    argocd.argoproj.io/sync-wave: "1"
 spec:
   replicas: 1
   selector:

@@ -3,11 +3,11 @@ kind: Kustomization
 
 resources:
   - datakit-helmrelease.yaml
-  - datakit-token-sealed.yaml
+  - datakit-token.yaml
 
 commonLabels:
   app.kubernetes.io/part-of: site-uptime-watcher
-  app.kubernetes.io/managed-by: argocd
+  app.kubernetes.io/managed-by: kubectl
 
 vars:
 - name: AWS_ACCOUNT_ID

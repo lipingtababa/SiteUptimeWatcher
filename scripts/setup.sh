@@ -1,3 +1,5 @@
-# call 2 other scripts
+# call provision cluster script
 ./provision_cluster.sh
-./install_argocd.sh
+
+
+./deploy-applications.sh
