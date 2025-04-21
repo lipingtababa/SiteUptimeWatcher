@@ -2,9 +2,6 @@
 set -e
 
 # Set AWS account ID
-export AWS_ACCOUNT="975688691016"
-export AWS_REGION="us-east-1"
-export EKS_CLUSTER="idp"
 export NAMESPACE="watcher"
 
 # Colors for output
@@ -15,13 +12,9 @@ NC='\033[0m' # No Color
 
 echo -e "${GREEN}Deploying applications...${NC}"
 
-# Apply DataKit resources
-echo -e "${YELLOW}Applying DataKit resources...${NC}"
-kubectl apply -k ../infra/application/datakit
-
-# Apply watcher application resources
+# Apply watcher application resources directly
 echo -e "${YELLOW}Applying watcher application resources...${NC}"
-kubectl apply -k ../infra/application
+kubectl apply -f ../infra/application/watcher.deployment.yaml
 
 # Wait for resources to be ready
 echo -e "${YELLOW}Waiting for resources to be ready...${NC}"

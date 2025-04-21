@@ -29,16 +29,16 @@ spec:
       serviceAccountName: watcher-sa
       containers:
       - name: watcher
-        image: $(AWS_ACCOUNT_ID).dkr.ecr.us-east-1.amazonaws.com/watcher:latest
+        image: 975688691016.dkr.ecr.us-east-1.amazonaws.com/watcher:latest
         ports:
         - containerPort: 8000
         env:
         - name: AWS_REGION
-          value: $(AWS_REGION)
+          value: us-east-1
         - name: AWS_ACCOUNT
-          value: $(AWS_ACCOUNT_ID)
+          value: "975688691016"
         - name: EKS_CLUSTER
-          value: $(EKS_CLUSTER)
+          value: idp
         - name: NAMESPACE
           value: watcher
         resources:

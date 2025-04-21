@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: Secret
-metadata:
-  name: datakit-token
-  namespace: watcher
-type: Opaque
-stringData:
-  token: "tkn_79e8251c3aac427fb3a641822356473e" 
