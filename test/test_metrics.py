@@ -6,17 +6,20 @@ import sys
 import time
 from pathlib import Path
 import pytest
+from unittest.mock import MagicMock
 
 # To import the src code, we need to add the src directory to the path
 src_directory = Path(__file__).resolve().parent.parent / "src"
 sys.path.append(str(src_directory))
-from metrics import Stat
+from worker.metrics import Stat
 from endpoint import Endpoint
 
 class aiohttp_response:
     def __init__(self, status=200, resp_data=None):
         self.status = status
         self.resp_data = resp_data
+        self.elapsed = MagicMock()
+        self.elapsed.total_seconds = lambda: 0.1
 
     async def text(self):
         return self.resp_data

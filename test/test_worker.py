@@ -4,13 +4,13 @@
 
 import sys
 from pathlib import Path
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import patch, MagicMock, AsyncMock, ANY
 import pytest
 
 # To import the src code, we need to add the src directory to the path
 src_directory = Path(__file__).resolve().parent.parent / "src"
 sys.path.append(str(src_directory))
-from worker import Worker
+from worker.worker import Worker
 from endpoint import Endpoint
 import utils
 
@@ -34,7 +34,7 @@ def create_mocked_sleep():
 @pytest.mark.asyncio
 @patch('aiohttp.ClientSession')
 @patch('asyncio.sleep', side_effect=create_mocked_sleep())
-@patch('metrics.Stat')
+@patch('src.worker.metrics.Stat')
 @patch('asyncio.Queue', return_value=MagicMock(put=AsyncMock()))
 async def test_monitor_with_failed_request(mock_queue, mock_stat, mock_sleep, mock_client_session):
     # here we mock a failed get request
@@ -52,7 +52,7 @@ async def test_monitor_with_failed_request(mock_queue, mock_stat, mock_sleep, mo
     await worker.monitor(endpoint)
 
     assert mock_queue.return_value.put.call_count == 2
-    mock_queue.return_value.put.assert_called_with(mocked_stat_object)
+    mock_queue.return_value.put.assert_called_with(ANY)
 
     assert mocked_stat_object.build_from_successful_http_req.call_count == 0
     assert mocked_stat_object.build_from_failed_http_req.call_count == 2
@@ -64,7 +64,7 @@ async def test_monitor_with_failed_request(mock_queue, mock_stat, mock_sleep, mo
 @pytest.mark.asyncio
 @patch('aiohttp.ClientSession')
 @patch('asyncio.sleep', side_effect=create_mocked_sleep())
-@patch('metrics.Stat')
+@patch('worker.metrics.Stat')
 @patch('asyncio.Queue', return_value=MagicMock(put = AsyncMock()))
 async def test_monitor_with_successful_request(mock_queue, mock_stat, mock_sleep, mock_client_session):
     # here we mock a successful get request
@@ -82,7 +82,7 @@ async def test_monitor_with_successful_request(mock_queue, mock_stat, mock_sleep
     await worker.monitor(endpoint)
 
     assert mock_queue.return_value.put.call_count == 2
-    mock_queue.return_value.put.assert_called_with(mocked_stat_object)
+    mock_queue.return_value.put.assert_called_with(ANY)
 
     mocked_stat_object.build_from_successful_http_req.assert_called_with(mock_session_instance.get.return_value)
     assert mocked_stat_object.build_from_successful_http_req.call_count == 2

@@ -4,12 +4,12 @@
 """
 import os
 import asyncio
-import requests
 from typing import List
 from asyncio import Queue
+import requests
 
-from utils import logger, KEEPER_SLEEP_INTERVAL, RUNNING_STATUS
-from metrics import Stat
+from src.utils import logger
+from src.worker.metrics import Stat
 
 PG_BATCH_SIZE = 1000
 
@@ -20,33 +20,47 @@ truewatch_port = int(os.getenv("TRUEWATCH_PORT", "9529"))
 truewatch_url = f"http://{truewatch_host}:{truewatch_port}"
 
 class MetricsHandler:
-    """
-    This class handles metrics collection and sending to TrueWatch.
-    """
+    """Handler for processing and storing metrics."""
+    
     def __init__(self, metrics_buffer: Queue):
+        """Initialize the metrics handler."""
         self.metrics_buffer = metrics_buffer
+        self._running = True
+
+    def stop(self):
+        """Stop the metrics handler."""
+        self._running = False
 
     async def run(self):
-        """Consume stats from metrics_buffer and send them to TrueWatch."""
+        """Run the metrics handler."""
         logger.info(f"MetricsHandler {id(self)} started")
-        while RUNNING_STATUS:
+        while self._running:
             try:
                 queue_size = self.metrics_buffer.qsize()
                 if queue_size > 0:
+                    logger.info(f"Processing {queue_size} metrics")
                     metrics = []
                     consumer_length = queue_size if queue_size < PG_BATCH_SIZE else PG_BATCH_SIZE
                     logger.info(f"MetricsHandler consumes {consumer_length}")
                     for _ in range(consumer_length):
                         metric = await self.metrics_buffer.get()
                         metrics.append(metric)
+                        await self._process_metric(metric)
                         self.metrics_buffer.task_done()
                     # Send metrics to TrueWatch if enabled
                     self._send_metrics_to_truewatch(metrics)
             except Exception as e:
-                logger.error(e)
-            finally:
-                await asyncio.sleep(KEEPER_SLEEP_INTERVAL)
+                logger.error(f"Error processing metric: {e}")
+                await asyncio.sleep(1)
         logger.info("Exiting MetricsHandler loop")
+
+    async def _process_metric(self, metric: Stat):
+        """Process a single metric."""
+        try:
+            # TODO: Store metric in database
+            logger.info(f"Processed metric for {metric.endpoint.url}")
+        except Exception as e:
+            logger.error(f"Error storing metric: {e}")
 
     def _send_metrics_to_truewatch(self, metrics: List[Stat]):
         """Send metrics to TrueWatch using HTTP API.
@@ -91,4 +105,5 @@ class MetricsHandler:
             if response.status_code != 200:
                 logger.error(f"Error sending metrics to TrueWatch: {response.status_code} - {response.text}")
         except Exception as e:
-            logger.error(f"Error sending metrics to TrueWatch: {e}") 
+            logger.error(f"Error sending metrics to TrueWatch: {e}")
+            

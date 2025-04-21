@@ -3,14 +3,13 @@
 2. Fetch sites from DB
 3. CRUD operations for endpoints
 """
+from typing import List, Optional, Dict, Any
 import os
 import re
 import psycopg2
 import psycopg2.extras
-import psycopg2.pool
-from typing import List, Optional, Dict, Any
 
-from utils import logger
+from src.utils import logger
 from endpoint import Endpoint
 
 ENDPOINTS_TABLE_NAME = 'endpoints'
@@ -232,4 +231,4 @@ class EndpointManager:
         return self
 
     def __del__(self):
-        self.connection_pool.closeall() 
+        self.connection_pool.closeall()

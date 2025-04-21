@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Endpoint Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .endpoint-list {
+            margin-top: 20px;
+        }
+        .endpoint-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .endpoint-item button {
+            margin-left: 10px;
+        }
+        .delete-btn {
+            background-color: #f44336;
+        }
+        .delete-btn:hover {
+            background-color: #da190b;
+        }
+        .edit-btn {
+            background-color: #2196F3;
+        }
+        .edit-btn:hover {
+            background-color: #0b7dda;
+        }
+    </style>
+</head>
+<body>
+    <h1>Endpoint Manager</h1>
+    
+    <div id="endpointForm">
+        <h2>Add/Edit Endpoint</h2>
+        <form id="endpointDataForm">
+            <input type="hidden" id="endpointId">
+            <div class="form-group">
+                <label for="url">URL:</label>
+                <input type="text" id="url" required>
+            </div>
+            <div class="form-group">
+                <label for="regex">Regex Pattern (optional):</label>
+                <input type="text" id="regex">
+            </div>
+            <div class="form-group">
+                <label for="interval">Check Interval (seconds, 5-300):</label>
+                <input type="number" id="interval" min="5" max="300" value="60" required>
+            </div>
+            <button type="submit">Save Endpoint</button>
+            <button type="button" onclick="resetForm()">Cancel</button>
+        </form>
+    </div>
+
+    <div class="endpoint-list">
+        <h2>Endpoints</h2>
+        <div id="endpointsList"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = '/endpoints';
+
+        // Load endpoints when page loads
+        document.addEventListener('DOMContentLoaded', loadEndpoints);
+
+        // Handle form submission
+        document.getElementById('endpointDataForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const endpointId = document.getElementById('endpointId').value;
+            const data = {
+                url: document.getElementById('url').value,
+                regex: document.getElementById('regex').value || null,
+                interval: parseInt(document.getElementById('interval').value)
+            };
+
+            try {
+                if (endpointId) {
+                    // Update existing endpoint
+                    await fetch(`${API_BASE_URL}/${endpointId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    // Create new endpoint
+                    await fetch(API_BASE_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                }
+                resetForm();
+                loadEndpoints();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error saving endpoint');
+            }
+        });
+
+        async function loadEndpoints() {
+            try {
+                const response = await fetch(API_BASE_URL);
+                const endpoints = await response.json();
+                const endpointsList = document.getElementById('endpointsList');
+                endpointsList.innerHTML = '';
+
+                endpoints.forEach(endpoint => {
+                    const div = document.createElement('div');
+                    div.className = 'endpoint-item';
+                    div.innerHTML = `
+                        <strong>URL:</strong> ${endpoint.url}<br>
+                        <strong>Regex:</strong> ${endpoint.regex || 'None'}<br>
+                        <strong>Interval:</strong> ${endpoint.interval} seconds
+                        <button class="edit-btn" onclick="editEndpoint(${endpoint.endpoint_id})">Edit</button>
+                        <button class="delete-btn" onclick="deleteEndpoint(${endpoint.endpoint_id})">Delete</button>
+                    `;
+                    endpointsList.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error loading endpoints');
+            }
+        }
+
+        async function editEndpoint(id) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/${id}`);
+                const endpoint = await response.json();
+                document.getElementById('endpointId').value = endpoint.endpoint_id;
+                document.getElementById('url').value = endpoint.url;
+                document.getElementById('regex').value = endpoint.regex || '';
+                document.getElementById('interval').value = endpoint.interval;
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error loading endpoint details');
+            }
+        }
+
+        async function deleteEndpoint(id) {
+            if (confirm('Are you sure you want to delete this endpoint?')) {
+                try {
+                    await fetch(`${API_BASE_URL}/${id}`, {
+                        method: 'DELETE'
+                    });
+                    loadEndpoints();
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error deleting endpoint');
+                }
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('endpointDataForm').reset();
+            document.getElementById('endpointId').value = '';
+        }
+    </script>
+</body>
+</html> 

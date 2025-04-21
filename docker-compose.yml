@@ -21,6 +21,7 @@ services:
       - .:/app
     ports:
       - 8000:8000
+      - 8080:8080
     networks:
       - watcher-network
     environment:
@@ -36,6 +37,8 @@ services:
       - .:/app
     networks:
       - watcher-network
+    ports:
+      - 8080:8080
     depends_on:
       preparer:
         condition: service_completed_successfully

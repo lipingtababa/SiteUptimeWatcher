@@ -3,22 +3,39 @@
 This main function runs on a single core.
 Load configuration, Ensure DB is ready, Fetch sites from DB and Start monitoring sites.    
 """
-import os
 import signal
 import asyncio
-import sys
-from multiprocessing import Process, cpu_count
-from utils import logger, load_config, handle_signals, EnvException, RUNNING_STATUS
-from worker import Worker
-from metrics_handler import MetricsHandler
-from endpoint_manager import EndpointManager
+import os
 
+from src.utils import logger, load_config
+from src.worker.worker import Worker
+from src.worker.metrics_handler import MetricsHandler
+from src.endpoint_manager import EndpointManager
+
+class WorkerManager:
+    """Manager class to handle worker lifecycle."""
+    
+    def __init__(self):
+        """Initialize the worker manager."""
+        self.worker = None
+        
+    def set_worker(self, worker):
+        """Set the worker instance."""
+        self.worker = worker
+        
+    def stop_worker(self):
+        """Stop the worker."""
+        if self.worker:
+            self.worker.stop()
+
+# Create a global worker manager instance
+worker_manager = WorkerManager()
+
+# pylint: disable=unused-argument
 def signal_handler(sig, frame):
     """Handle SIGINT and SIGTERM signals."""
     logger.info("Received signal to terminate")
-    global RUNNING_STATUS
-    RUNNING_STATUS = False
-    sys.exit(0)
+    worker_manager.stop_worker()
 
 async def run_worker(partition_id: int, partition_count: int, metrics_buffer):
     """Run a worker process."""
@@ -32,6 +49,7 @@ async def run_worker(partition_id: int, partition_count: int, metrics_buffer):
         
         # Create and run worker
         worker = Worker(metrics_buffer)
+        worker_manager.set_worker(worker)
         await worker.run(endpoints)
     except Exception as e:
         logger.error(f"Error in worker {partition_id}: {e}")
@@ -47,19 +65,15 @@ async def run_metrics_handler(metrics_buffer):
         raise e
 
 async def main():
-    """ 
-    This is a single thread program.
-    Chance is that this process is one of many instances of this program.
-    Instances might run on the same machine or different machines.
-    """
-
-    partition_count, partition_id = read_partition_count_and_id()
-    logger.info("Starting with Partition ID: %d and Partition Count: %d",
-                partition_id,
-                partition_count)
-    signal.signal(signal.SIGINT, handle_signals)
-
+    """Main entry point for the worker."""
+    # Load configuration
     load_config()
+    
+    # Set up signal handlers
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    
+    # Create worker and metrics handler
     metrics_buffer = asyncio.Queue()
     
     # Initialize endpoint manager
@@ -67,7 +81,7 @@ async def main():
     endpoint_manager.check_readiness()
     
     # Fetch endpoints for this partition
-    endpoints = endpoint_manager.fetch_endpoints(partition_count, partition_id)
+    endpoints = endpoint_manager.fetch_endpoints(os.getenv("PARTITION_COUNT"), os.getenv("PARTITION_ID"))
     if not endpoints:
         logger.warning("No endpoints found in database")
         return
@@ -81,16 +95,11 @@ async def main():
     
     # Add worker task
     worker = Worker(metrics_buffer)
+    worker_manager.set_worker(worker)
     tasks.append(asyncio.create_task(worker.run(endpoints)))
     
     # Wait for all tasks to complete
     await asyncio.gather(*tasks)
-
-def read_partition_count_and_id():
-    """Read partition count and ID from environment variables."""
-    partition_count = int(os.getenv("PARTITION_COUNT", "1"))
-    partition_id = int(os.getenv("PARTITION_ID", "0"))
-    return partition_count, partition_id
 
 if __name__ == "__main__":
     asyncio.run(main())

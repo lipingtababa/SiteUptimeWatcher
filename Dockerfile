@@ -14,5 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # 8000 is used by the test server
 EXPOSE 8000
+# 8080 is used by the API
+EXPOSE 8080
 
 CMD ["./entrypoint.sh"]

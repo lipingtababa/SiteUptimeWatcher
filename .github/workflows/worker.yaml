@@ -45,8 +45,8 @@ jobs:
 
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        python3 -m pip install --upgrade pip
+        pip3 install -r requirements.txt
 
     - name: Run worker tests
       run: |
@@ -86,5 +86,5 @@ jobs:
 
     - name: Deploy to EKS
       run: |
-        kubectl apply -f infra/application/worker.deployment.yaml
-        kubectl -n ${{ env.NAMESPACE }} set image deployment/watcher-worker worker=${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+        kubectl apply -f infra/application/watcher.deployment.yaml
+        kubectl -n ${{ env.NAMESPACE }} set image deployment/watcher worker=${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
