@@ -7,6 +7,7 @@
 import os
 from datetime import datetime, timezone
 import re
+from typing import List
 
 from asyncio import Queue
 import asyncio
@@ -215,8 +216,23 @@ class Keeper:
         finally:
             self.release_connection(conn)
 
-    def _send_metrics_to_datakit(self, metrics: [Stat]):
-        """Send metrics to Datakit using HTTP API."""
+    def _send_metrics_to_datakit(self, metrics: List[Stat]):
+        """Send metrics to DataKit using HTTP API.
+        DataKit expects metrics in the following format:
+        {
+            "measurement": "site_uptime_watcher",
+            "tags": {
+                "endpoint": "url",
+                "status_code": "code",
+                "regex_match": "true/false"
+            },
+            "fields": {
+                "response_time": value,
+                "status_code": value,
+                "regex_match": 1/0
+            }
+        }
+        """
         try:
             # Prepare metrics data for all metrics in the batch
             metrics_data = []
@@ -241,9 +257,9 @@ class Keeper:
             metrics_url = f"{datakit_url}/v1/write/metrics"
             response = requests.post(metrics_url, json=metrics_data, timeout=5)
             if response.status_code != 200:
-                logger.error(f"Error sending metrics to Datakit: {response.status_code} - {response.text}")
+                logger.error(f"Error sending metrics to DataKit: {response.status_code} - {response.text}")
         except Exception as e:
-            logger.error(f"Error sending metrics to Datakit: {e}")
+            logger.error(f"Error sending metrics to DataKit: {e}")
 
     def __del__(self):
         self.connection_pool.closeall()
