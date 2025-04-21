@@ -6,6 +6,3 @@
 
 # initialize database
 ./init_database.sh
-
-# deploy applications
-./deploy_applications.sh

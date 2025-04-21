@@ -1,10 +1,24 @@
-name: Build and Push Docker Image
+name: Build and Deploy Worker
 
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'src/worker/**'
+      - 'src/utils.py'
+      - 'src/keeper.py'
+      - 'src/endpoint.py'
+      - 'infra/worker/**'
+      - 'infra/application/worker.deployment.yaml'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'src/worker/**'
+      - 'src/utils.py'
+      - 'src/keeper.py'
+      - 'src/endpoint.py'
+      - 'infra/worker/**'
+      - 'infra/application/worker.deployment.yaml'
 
 env:
   AWS_REGION: us-east-1
@@ -15,7 +29,7 @@ env:
   NAMESPACE: watcher
 
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -34,10 +48,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Run tests
+    - name: Run worker tests
       run: |
-        pytest
-        pylint src/
+        pytest src/worker/tests
+        pylint src/worker
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -54,10 +68,11 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Build and push
+    - name: Build and push Worker image
       uses: docker/build-push-action@v5
       with:
         context: .
+        file: infra/worker/Dockerfile
         platforms: linux/amd64
         push: true
         tags: |
@@ -65,3 +80,11 @@ jobs:
           ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
+
+    - name: Update kube config
+      run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER }} --region ${{ env.AWS_REGION }}
+
+    - name: Deploy to EKS
+      run: |
+        kubectl apply -f infra/application/worker.deployment.yaml
+        kubectl -n ${{ env.NAMESPACE }} set image deployment/watcher-worker worker=${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}

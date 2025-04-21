@@ -33,10 +33,6 @@ DB_PORT=$(aws ssm get-parameter \
     --query 'Parameter.Value' \
     --output text)
 
-# create 2 tables: endpoints and metrics
-# endpoints table: id, url, regex, interval
-# metrics table: id, endpoint_id, start_time, duration, status_code, regex_match
-
 # create endpoints table
 PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -U $DB_USER -d $DB_NAME -p $DB_PORT << EOF
 CREATE TABLE endpoints (
@@ -44,18 +40,6 @@ CREATE TABLE endpoints (
     url VARCHAR(255) NOT NULL,
     regex VARCHAR(255) NOT NULL,
     interval INT NOT NULL
-);
-EOF
-
-# create metrics table
-PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -U $DB_USER -d $DB_NAME -p $DB_PORT << EOF
-CREATE TABLE metrics (
-    id SERIAL PRIMARY KEY,
-    endpoint_id INT NOT NULL,
-    start_time TIMESTAMP NOT NULL,
-    duration INT NOT NULL,
-    status_code INT NOT NULL,
-    regex_match VARCHAR(255) NOT NULL
 );
 EOF
 
