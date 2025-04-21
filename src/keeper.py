@@ -24,7 +24,7 @@ METRICS_TABLE_NAME = 'metrics'
 PG_BATCH_SIZE = 1000
 
 # Datakit configuration
-DATAKIT_ENABLED = True
+DATAKIT_ENABLED = os.getenv("DATAKIT_ENABLED", "true") == "true"
 datakit_host = os.getenv("DATAKIT_HOST", "localhost")
 datakit_port = int(os.getenv("DATAKIT_PORT", "9529"))
 datakit_url = f"http://{datakit_host}:{datakit_port}"

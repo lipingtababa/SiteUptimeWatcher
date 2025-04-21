@@ -41,6 +41,8 @@ spec:
           value: idp
         - name: NAMESPACE
           value: watcher
+        - name: DATAKIT_ENABLED
+          value: "true"
         resources:
           requests:
             memory: "256Mi"
