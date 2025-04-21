@@ -5,7 +5,7 @@
 ./install_datakit.sh
 
 # initialize database
-./init-database.sh
+./init_database.sh
 
 # deploy applications
-./deploy-applications.sh
+./deploy_applications.sh
