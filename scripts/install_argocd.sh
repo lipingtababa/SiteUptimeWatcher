@@ -74,12 +74,14 @@ else
     echo "Run: kubectl get svc argocd-server -n argocd"
 fi
 
-# Apply root application
-echo -e "Applying root application..."
-kubectl apply -f ../infra/argocd/root.application.yaml
+# Apply ArgoCD applications
+echo -e "Applying ArgoCD applications..."
+kubectl apply -f ../infra/argocd/sealed-secrets.application.yaml
+kubectl apply -f ../infra/argocd/datakit.application.yaml
+kubectl apply -f ../infra/argocd/watcher.application.yaml
 
-# Wait for root application to be ready
-echo -e "Waiting for root application to be ready..."
-kubectl wait --for=condition=ready pod -l app.kubernetes.io=argocd-application-controller -n argocd --timeout=60s
+# Wait for ArgoCD application controller to be ready
+echo -e "Waiting for ArgoCD application controller to be ready..."
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=argocd-application-controller -n argocd --timeout=60s
 
 
