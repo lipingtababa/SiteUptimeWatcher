@@ -23,7 +23,23 @@ spec:
         name: datakit
         namespace: watcher
       interval: 1h
-  valuesFrom:
-  - kind: ConfigMap
-    name: datakit-values
-    valuesKey: values.yaml 
+  values:
+    datakit:
+      dataway_url: "https://eu1-openway.truewatch.com?token=$(DATAKIT_TOKEN)"
+      resources:
+        requests:
+          memory: "256Mi"
+          cpu: "100m"
+        limits:
+          memory: "512Mi"
+          cpu: "200m"
+      default_enabled_inputs: "cpu,disk,diskio,mem,swap,system,hostobject,net,host_processes,container"
+      global_tags:
+        project: "site-uptime-watcher"
+        env: "dev"
+      extraEnvs:
+        - name: DATAKIT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: datakit-token
+              key: token 

@@ -3,7 +3,6 @@ kind: Kustomization
 
 resources:
   - datakit-helmrelease.yaml
-  - datakit-values-configmap.yaml
   - datakit-token-sealed.yaml
 
 commonLabels:
