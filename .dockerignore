@@ -8,6 +8,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 .pytest_cache/
+.coverage
+htmlcov/
 
 # Development and IDE files
 .idea/
@@ -15,10 +17,33 @@ __pycache__/
 *.swp
 *.swo
 .cursor/
-
+*.log
+.git/
+.gitignore
+README.md
+LICENSE
+*.md
 
 # Local environment files
 .env.local
 .env.Development
 .env
+*.env
+.env.development
+
+# Docker files
+Dockerfile*
+docker-compose*.yml
+.docker/
+
+# Documentation
+docs/
+*.rst
+*.txt
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+*.egg
 

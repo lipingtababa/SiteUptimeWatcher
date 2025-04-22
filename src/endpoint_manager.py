@@ -10,7 +10,7 @@ import psycopg2
 import psycopg2.extras
 
 from src.utils import logger
-from endpoint import Endpoint
+from src.endpoint import Endpoint
 
 ENDPOINTS_TABLE_NAME = 'endpoints'
 

@@ -16,6 +16,7 @@ services:
       <<: *build-config
       volumes:
         - .:/app
+        - ./.env.development:/app/.env.development:ro
       networks:
         - watcher-network
       environment:
@@ -28,6 +29,7 @@ services:
     <<: *build-config
     volumes:
       - .:/app
+      - ./.env.development:/app/.env.development:ro
     ports:
       - 8000:8000
       - 8080:8080
@@ -44,6 +46,7 @@ services:
     privileged: true
     volumes:
       - .:/app
+      - ./.env.development:/app/.env.development:ro
     networks:
       - watcher-network
     ports:

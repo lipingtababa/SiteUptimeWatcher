@@ -42,6 +42,7 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
+        architecture: 'arm64'
 
     - name: Install dependencies
       run: |
@@ -73,7 +74,7 @@ jobs:
       with:
         context: .
         file: infra/worker/Dockerfile
-        platforms: linux/amd64
+        platforms: linux/arm64
         push: true
         tags: |
           ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}

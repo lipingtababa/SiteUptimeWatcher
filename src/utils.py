@@ -34,7 +34,7 @@ def init_logger():
 
 logger = init_logger()
 
-def load_config_from_file(file =".env"):
+def load_config_from_file(file =".env.development"):
     """Load configuration from .env or a specified file."""
     load_dotenv(file)
 
@@ -87,5 +87,11 @@ def load_secrets_from_secrets_manager():
 def load_config():
     """Load configuration from .env or a specified file."""    
     
+    # First try to load from environment variables
+    if all(os.getenv(var) for var in ["DB_HOST", "DB_PORT", "DB_USER", "DB_PASSWORD", "DB_NAME"]):
+        return
+
+    # Then try AWS SSM
     if not load_secrets_from_secrets_manager():
+        # Finally, try .env file
         load_config_from_file()

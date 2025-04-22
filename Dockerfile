@@ -1,23 +1,45 @@
-FROM python:3.11.0
+FROM --platform=linux/arm64 python:3.11.0-slim as builder
 
-# I do need netstats and tcpdump for debugging
-RUN apt update && apt install -y net-tools
-RUN apt install -y tcpdump
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    net-tools \
+    tcpdump \
+    gcc \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Add the current directory contents into the container at /app
-ADD ./ /app
+# Copy only requirements first to leverage Docker cache
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Set up Python path to include the project root
+# Copy only necessary source files
+COPY src/ src/
+COPY entrypoint.sh .
+
+# Final stage
+FROM --platform=linux/arm64 python:3.11.0-slim
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    net-tools \
+    tcpdump \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy from builder
+COPY --from=builder /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
+COPY --from=builder /app/src/ /app/src/
+COPY --from=builder /app/entrypoint.sh /app/
+
+# Set up Python path
 ENV PYTHONPATH=/app
 
-RUN pip install --no-cache-dir --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
-
-# 8000 is used by the test server
+# Expose ports
 EXPOSE 8000
-# 8080 is used by the API
 EXPOSE 8080
 
 CMD ["./entrypoint.sh"]
