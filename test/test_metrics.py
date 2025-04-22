@@ -27,7 +27,7 @@ class aiohttp_response:
 
 @pytest.mark.asyncio
 async def test_build_from_successful_http_req_match_with_simple_regex():
-    endpoint_with_simple_regex = Endpoint(1, "http://testserver:8000", ".*welcome", 5)
+    endpoint_with_simple_regex = Endpoint(1, "http://testserver:8001", ".*welcome", 5)
     stat = Stat(endpoint_with_simple_regex, time.time()-1)
     resp = aiohttp_response(200, "You are always welcome!")
 
@@ -36,7 +36,7 @@ async def test_build_from_successful_http_req_match_with_simple_regex():
     assert stat.status_code == 200
     assert stat.regex_match is True
 
-endpoint = Endpoint(1, "http://testserver:8000", r"you.*welcome at\s[0-9]{2}:[0-9]{2}$", 5)
+endpoint = Endpoint(1, "http://testserver:8001", r"you.*welcome at\s[0-9]{2}:[0-9]{2}$", 5)
 
 @pytest.mark.asyncio
 async def test_build_from_successful_http_req_match():

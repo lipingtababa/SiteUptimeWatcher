@@ -8,6 +8,7 @@ import os
 import re
 import psycopg2
 import psycopg2.extras
+import psycopg2.pool
 
 from src.utils import logger
 from src.endpoint import Endpoint
@@ -19,23 +20,30 @@ class EndpointManager:
     This class deals with the database and endpoint management.
     """
     def __init__(self):
-        self.connection_pool = psycopg2.pool.SimpleConnectionPool(
-            minconn=1,
-            maxconn=10,
-            dbname = os.getenv("DB_NAME"),
-            user = os.getenv("DB_USER"),
-            password = os.getenv("DB_PASSWORD"),
-            host = os.getenv("DB_HOST"),
-            port = os.getenv("DB_PORT")
+        self.connection_pool = None
+        try:
+            self.connection_pool = psycopg2.pool.SimpleConnectionPool(
+                minconn=1,
+                maxconn=10,
+                dbname=os.getenv("DB_NAME"),
+                user=os.getenv("DB_USER"),
+                password=os.getenv("DB_PASSWORD"),
+                host=os.getenv("DB_HOST"),
+                port=os.getenv("DB_PORT")
             )
+        except Exception as e:
+            logger.error(f"Failed to initialize connection pool: {e}")
 
     def get_connection(self):
         """Get a connection from the pool."""
+        if self.connection_pool is None:
+            raise RuntimeError("Database connection pool not initialized")
         return self.connection_pool.getconn()
 
     def release_connection(self, conn):
         """Release a connection back to the pool."""
-        self.connection_pool.putconn(conn)
+        if self.connection_pool is not None:
+            self.connection_pool.putconn(conn)
 
     def assure_endpoint_table(self):
         """Check if endpoint table is present"""
@@ -231,4 +239,6 @@ class EndpointManager:
         return self
 
     def __del__(self):
-        self.connection_pool.closeall()
+        """Clean up the connection pool."""
+        if hasattr(self, 'connection_pool') and self.connection_pool is not None:
+            self.connection_pool.closeall()

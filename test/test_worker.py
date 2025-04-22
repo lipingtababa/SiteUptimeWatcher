@@ -48,7 +48,7 @@ async def test_monitor_with_failed_request(mock_queue, mock_stat, mock_sleep, mo
     mocked_stat_object.build_from_successful_http_req = AsyncMock()
     mocked_stat_object.build_from_failed_http_req = MagicMock()
 
-    endpoint = Endpoint(1, "http://testserver:8000", r'.*', 5)
+    endpoint = Endpoint(1, "http://testserver:8001", r'.*', 5)
     worker = Worker()
     
     # Set up the mocked sleep to stop the worker after one iteration
@@ -82,7 +82,7 @@ async def test_monitor_with_successful_request(mock_queue, mock_stat, mock_sleep
     mocked_stat_object.build_from_successful_http_req = AsyncMock()
     mocked_stat_object.build_from_failed_http_req = MagicMock()
 
-    endpoint = Endpoint(1, "http://testserver:8000", r'.*', 5)
+    endpoint = Endpoint(1, "http://testserver:8001", r'.*', 5)
     worker = Worker()
     
     # Set up the mocked sleep to stop the worker after one iteration

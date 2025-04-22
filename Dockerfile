@@ -32,8 +32,12 @@ WORKDIR /app
 
 # Copy from builder
 COPY --from=builder /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
+COPY --from=builder /usr/local/bin/ /usr/local/bin/
 COPY --from=builder /app/src/ /app/src/
 COPY --from=builder /app/entrypoint.sh /app/
+
+# Make entrypoint.sh executable
+RUN chmod +x /app/entrypoint.sh
 
 # Set up Python path
 ENV PYTHONPATH=/app

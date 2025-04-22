@@ -87,11 +87,25 @@ def load_secrets_from_secrets_manager():
 def load_config():
     """Load configuration from .env or a specified file."""    
     
-    # First try to load from environment variables
-    if all(os.getenv(var) for var in ["DB_HOST", "DB_PORT", "DB_USER", "DB_PASSWORD", "DB_NAME"]):
+    # First try .env.development file
+    if os.path.exists(".env.development"):
+        logger.info("Loading configuration from .env.development")
+        load_config_from_file(".env.development")
         return
 
-    # Then try AWS SSM
-    if not load_secrets_from_secrets_manager():
-        # Finally, try .env file
-        load_config_from_file()
+    # Then try environment variables
+    if all(os.getenv(var) for var in ["DB_HOST", "DB_PORT", "DB_USER", "DB_PASSWORD", "DB_NAME"]):
+        logger.info("Using environment variables for configuration")
+        return
+
+    # Finally try AWS SSM
+    try:
+        if load_secrets_from_secrets_manager():
+            logger.info("Loaded configuration from AWS SSM")
+            return
+    except Exception as e:
+        logger.warning(f"Failed to load from AWS SSM: {e}")
+        
+    # If all else fails, try .env file
+    logger.info("Loading configuration from .env")
+    load_config_from_file(".env")

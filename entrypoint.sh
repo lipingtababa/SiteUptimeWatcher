@@ -5,7 +5,7 @@ if [[ "$RUN_AS" == "TEST_SERVER" ]]; then
     # start the test server
     uvicorn test.server.test_server:app --host 0.0.0.0 \
     --reload --timeout-keep-alive 305 \
-    --log-level error --port 8000
+    --log-level error --port 8001
 
 elif [[ "$RUN_AS" == "PREPARER" ]]; then
     # Assure tables presence
