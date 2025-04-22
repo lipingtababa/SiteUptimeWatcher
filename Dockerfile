@@ -40,7 +40,7 @@ COPY --from=builder /app/entrypoint.sh /app/
 RUN chmod +x /app/entrypoint.sh
 
 # Set up Python path
-ENV PYTHONPATH=/app
+ENV PYTHONPATH=/app/src
 
 # Expose ports
 EXPOSE 8000
