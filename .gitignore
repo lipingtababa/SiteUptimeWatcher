@@ -1,6 +1,7 @@
 __pycache__/
 /detect/
 .env
+.env.development
 # Local Terraform configuration
 terraform.tfvars
 *.tfvars
