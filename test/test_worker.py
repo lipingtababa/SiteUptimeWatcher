@@ -12,14 +12,15 @@ src_directory = Path(__file__).resolve().parent.parent / "src"
 sys.path.append(str(src_directory))
 from worker.worker import Worker
 from endpoint import Endpoint
-import utils
 
 @pytest.fixture(autouse=True)
-def reset_globals():
-    # If not reset, the RUNNING_STATUS will be False after one test and following tests will fail
-    utils.RUNNING_STATUS = True
+def reset_worker():
+    """Reset the worker's running state before each test."""
+    # This fixture is no longer needed as we're using instance variables
+    pass
 
-def create_mocked_sleep():
+def create_mocked_sleep(worker):
+    """Create a mocked sleep function that stops the worker after one iteration."""
     # Use a closure to avoid global variable
     num_of_monitor_iterations = 0
     # pylint: disable=unused-argument
@@ -27,13 +28,13 @@ def create_mocked_sleep():
         nonlocal num_of_monitor_iterations
         num_of_monitor_iterations += 1
         if num_of_monitor_iterations > 1:
-            utils.RUNNING_STATUS = False
+            worker.stop()
     return mocked_sleep
 
 
 @pytest.mark.asyncio
 @patch('aiohttp.ClientSession')
-@patch('asyncio.sleep', side_effect=create_mocked_sleep())
+@patch('asyncio.sleep')
 @patch('src.worker.metrics.Stat')
 @patch('asyncio.Queue', return_value=MagicMock(put=AsyncMock()))
 async def test_monitor_with_failed_request(mock_queue, mock_stat, mock_sleep, mock_client_session):
@@ -49,6 +50,10 @@ async def test_monitor_with_failed_request(mock_queue, mock_stat, mock_sleep, mo
 
     endpoint = Endpoint(1, "http://testserver:8000", r'.*', 5)
     worker = Worker()
+    
+    # Set up the mocked sleep to stop the worker after one iteration
+    mock_sleep.side_effect = create_mocked_sleep(worker)
+    
     await worker.monitor(endpoint)
 
     assert mock_queue.return_value.put.call_count == 2
@@ -59,12 +64,12 @@ async def test_monitor_with_failed_request(mock_queue, mock_stat, mock_sleep, mo
 
     mock_sleep.assert_called_with(endpoint.interval)
     assert mock_sleep.call_count == 2
-    assert utils.RUNNING_STATUS is False
+    assert worker._running is False
 
 @pytest.mark.asyncio
 @patch('aiohttp.ClientSession')
-@patch('asyncio.sleep', side_effect=create_mocked_sleep())
-@patch('worker.metrics.Stat')
+@patch('asyncio.sleep')
+@patch('src.worker.metrics.Stat')
 @patch('asyncio.Queue', return_value=MagicMock(put = AsyncMock()))
 async def test_monitor_with_successful_request(mock_queue, mock_stat, mock_sleep, mock_client_session):
     # here we mock a successful get request
@@ -79,6 +84,10 @@ async def test_monitor_with_successful_request(mock_queue, mock_stat, mock_sleep
 
     endpoint = Endpoint(1, "http://testserver:8000", r'.*', 5)
     worker = Worker()
+    
+    # Set up the mocked sleep to stop the worker after one iteration
+    mock_sleep.side_effect = create_mocked_sleep(worker)
+    
     await worker.monitor(endpoint)
 
     assert mock_queue.return_value.put.call_count == 2
@@ -90,4 +99,4 @@ async def test_monitor_with_successful_request(mock_queue, mock_stat, mock_sleep
 
     mock_sleep.assert_called_with(endpoint.interval)
     assert mock_sleep.call_count == 2
-    assert utils.RUNNING_STATUS is False
+    assert worker._running is False

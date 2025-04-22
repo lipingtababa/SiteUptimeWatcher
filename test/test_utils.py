@@ -41,4 +41,4 @@ def test_load_config_from_file_missing_variable():
             # assert that the exception is raised and msg is correct
             with pytest.raises(EnvException) as e:
                 load_config_from_file(file = "./test/test_data/env_files/" + file)
-            assert str(e.value) == "DB_HOST, DB_PORT, DB_USER, DB_NAME must be set in the file"
+            assert str(e.value) == "DB_HOST, DB_PORT, DB_USER, DB_NAME, DB_PASSWORD must be set in the file"
