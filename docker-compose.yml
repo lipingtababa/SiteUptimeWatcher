@@ -1,10 +1,19 @@
 version: '3.8'
+
+# Build configuration
+x-build: &build-config
+  build:
+    context: .
+    dockerfile: Dockerfile
+    platforms:
+      - linux/arm64
+
 services:
   preparer:
+      platform: linux/arm64
       restart: no
-      build:
-        context: .
-        dockerfile: Dockerfile
+      image: watcher:latest
+      <<: *build-config
       volumes:
         - .:/app
       networks:
@@ -13,10 +22,10 @@ services:
         - RUN_AS=PREPARER
 
   testserver:
+    platform: linux/arm64
     restart: always
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: watcher:latest
+    <<: *build-config
     volumes:
       - .:/app
     ports:
@@ -28,10 +37,10 @@ services:
       - RUN_AS=TEST_SERVER
 
   watcher:
+    platform: linux/arm64
     restart: no
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: watcher:latest
+    <<: *build-config
     privileged: true
     volumes:
       - .:/app
