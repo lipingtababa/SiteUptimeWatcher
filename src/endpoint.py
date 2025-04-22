@@ -18,6 +18,17 @@ class Endpoint:
 
         self.endpoint_id = endpoint_id
         self.url = url
-        if regex:
-            self.regex = re.compile(regex)
+        self.regex = regex  # Store the regex pattern as a string
+        self._compiled_regex = re.compile(regex) if regex else None  # Store compiled regex separately
         self.interval = interval
+
+    @property
+    def regex_pattern(self):
+        """Get the regex pattern as a string."""
+        return self.regex
+
+    def matches(self, text):
+        """Check if the text matches the regex pattern."""
+        if not self._compiled_regex:
+            return True
+        return bool(self._compiled_regex.search(text))

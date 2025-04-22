@@ -10,6 +10,7 @@ from pydantic import BaseModel, validator, HttpUrl
 import uvicorn
 
 from src.endpoint_manager import EndpointManager
+from src.utils import load_config
 
 app = FastAPI(
     title="Site Uptime Watcher API",
@@ -64,6 +65,15 @@ class EndpointResponse(EndpointBase):
     """Model for endpoint response data including the endpoint ID."""
     endpoint_id: int
 
+    def __init__(self, **data):
+        """Initialize the model and use regex pattern if available."""
+        if 'regex' in data:
+            if hasattr(data['regex'], 'pattern'):
+                data['regex'] = data['regex'].pattern
+            elif hasattr(data['regex'], 'regex_pattern'):
+                data['regex'] = data['regex'].regex_pattern
+        super().__init__(**data)
+
     # pylint: disable=too-few-public-methods
     class Config:
         """Configuration for the EndpointResponse model."""
@@ -72,6 +82,7 @@ class EndpointResponse(EndpointBase):
 # Dependency to get endpoint manager
 def get_endpoint_manager():
     """Create and initialize an EndpointManager instance for dependency injection."""
+    load_config()
     manager = EndpointManager()
     manager.check_readiness()
     return manager
@@ -171,5 +182,5 @@ async def delete_endpoint(
 
 if __name__ == "__main__":
     port = int(os.getenv("API_PORT", "8080"))
-    uvicorn.run("api.main:app", host="0.0.0.0", port=port, reload=True)
+    uvicorn.run("src.api.main:app", host="0.0.0.0", port=port, reload=True)
     

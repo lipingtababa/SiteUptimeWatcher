@@ -116,9 +116,6 @@
                 endpointElement.className = 'endpoint-item';
                 endpointElement.innerHTML = `
                     <span class="endpoint-url">${endpoint.url}</span>
-                    <span class="endpoint-status ${endpoint.is_up ? 'status-up' : 'status-down'}">
-                        ${endpoint.is_up ? 'UP' : 'DOWN'}
-                    </span>
                     <div>
                         <small>Interval: ${endpoint.interval}s</small>
                         ${endpoint.regex ? `<small> | Regex: ${endpoint.regex}</small>` : ''}

@@ -20,9 +20,6 @@ htmlcov/
 *.log
 .git/
 .gitignore
-README.md
-LICENSE
-*.md
 
 # Local environment files
 .env.local

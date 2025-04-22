@@ -17,7 +17,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # Copy only necessary source files
 COPY src/ src/
+COPY test/ test/
 COPY entrypoint.sh .
+
 
 # Final stage
 FROM --platform=linux/arm64 python:3.11.0-slim
@@ -34,13 +36,14 @@ WORKDIR /app
 COPY --from=builder /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
 COPY --from=builder /app/src/ /app/src/
+COPY --from=builder /app/test/ /app/test/
 COPY --from=builder /app/entrypoint.sh /app/
 
 # Make entrypoint.sh executable
 RUN chmod +x /app/entrypoint.sh
 
 # Set up Python path
-ENV PYTHONPATH=/app/src
+ENV PYTHONPATH=/app
 
 # Expose ports
 EXPOSE 8000
