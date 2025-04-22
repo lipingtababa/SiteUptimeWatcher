@@ -2,18 +2,12 @@
 # -*- coding: utf-8 -*-
 """This script is used to fill the DB with random endpoints."""
 
-import sys
-from pathlib import Path
 import random
-
 import psycopg2
 import psycopg2.extras
 
-# To import the Site and Keeper class, we need to add the src directory to the path
-src_directory = Path(__file__).resolve().parent.parent.parent / "src"
-sys.path.append(str(src_directory))
-from utils import load_config, logger
-from keeper import Keeper, ENDPOINTS_TABLE_NAME, PG_BATCH_SIZE
+from src.utils import load_config, logger
+from src.worker.keeper import Keeper, ENDPOINTS_TABLE_NAME, PG_BATCH_SIZE
 
 # pylint: disable=too-few-public-methods
 class SiteGenerator(Keeper):

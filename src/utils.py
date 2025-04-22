@@ -51,12 +51,12 @@ def load_config_from_file(file =".env"):
 
 def get_ssm_parameter(param_name, with_decryption=True):
     """Get a parameter from AWS SSM Parameter Store."""
-    session = boto3.session.Session()
-    client = session.client(
-        service_name='ssm',
-        region_name='us-east-1'
-    )
     try:
+        session = boto3.session.Session()
+        client = session.client(
+            service_name='ssm',
+            region_name='us-east-1'
+        )
         parameter = client.get_parameter(
             Name=param_name,
             WithDecryption=with_decryption

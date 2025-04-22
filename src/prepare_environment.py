@@ -3,8 +3,8 @@
 """
 Prepare environment for the program.
 """
-from utils import logger, load_config
-from endpoint_manager import EndpointManager
+from src.utils import logger, load_config
+from src.endpoint_manager import EndpointManager
 
 def prepare_environment():
     """Check if DB is ready and create tables if necessary."""

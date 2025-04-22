@@ -50,8 +50,8 @@ jobs:
 
     - name: Run worker tests
       run: |
-        pytest src/worker/tests
-        pylint src/worker
+        pytest test
+        pylint src
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
